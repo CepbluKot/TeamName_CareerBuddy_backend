@@ -3,8 +3,10 @@ from pydantic import BaseModel
 from flask import Response
 from flask_openapi3 import Info, Tag
 from flask_openapi3 import APIBlueprint, OpenAPI
-from models.employee import Employees as employee_model
+from models.employees import Employees as employee_model
 from schemas.employees import Employees as employees_schema
+import schemas.career_goals
+import schemas.feedback
 from settings import db
 from uuid import UUID, uuid4
 
