@@ -1,0 +1,6 @@
+FROM python:3.10.14-bookworm
+WORKDIR /docker_ml_model_service/code
+COPY ./ml_model/requirements.txt /docker_ml_model_service/code/requirements.txt
+RUN pip install --no-cache-dir --upgrade -r /docker_ml_model_service/code/requirements.txt
+COPY ./ml_model /docker_ml_model_service/code
+COPY ./.env /docker_ml_model_service/code/.env
