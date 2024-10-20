@@ -4,7 +4,7 @@ from typing import List
 
 
 class Employees(BaseModel):
-    user_id: UUID = Field(default_factory=uuid4)
+    id: UUID = Field(default_factory=uuid4)
     name: str = Field(None)
     surname: str = Field(None)
     email: str = Field(None)
@@ -29,5 +29,24 @@ class Employees(BaseModel):
     years_since_last_promotion: int = Field(None)
     years_with_cur_manager: int = Field(None)
 
+    class Config:
+        orm_mode = True
+
+
+class Roles(BaseModel):
+    id: int = Field(None)
+    name: str = Field(None)
+    admin_page: bool = Field(None)
+    feedback_page: bool = Field(None)
+    career_goal_page: bool = Field(None)
+    
+    class Config:
+        orm_mode = True
+
+
+class Departments(BaseModel):
+    id: int = Field(None)
+    name: str = Field(None)
+    
     class Config:
         orm_mode = True
