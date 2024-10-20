@@ -26,4 +26,5 @@ SQLAlchemy==2.0.23
 typing_extensions==4.8.0
 Werkzeug==2.3.8
 flask_openapi3==4.0.1
+datadog==0.44.0
 flask-openapi3-swagger

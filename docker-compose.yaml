@@ -273,7 +273,8 @@ services:
     build: ./backend
     restart: always
 
-    # network_mode: "host"
+    ports:
+      - "8000:8000"
 
     volumes:
       - .:/app/
@@ -284,6 +285,10 @@ services:
     networks:
       back_network:
         ipv4_address: 172.16.57.13
+
+    environment:
+      STATSD_HOST: "statsd-exporter"
+      STATSD_PORT: "9125"
 
   pgadmin:
     container_name: pgadmin4_container
@@ -302,6 +307,45 @@ services:
     networks:
       back_network:
         ipv4_address: 172.16.57.14
+
+  statsd-exporter:
+    image: prom/statsd-exporter:v0.22.4
+    ports:
+      - "9125:9125"
+      - "9102:9102"    
+    networks:
+      back_network:
+        ipv4_address: 172.16.57.15
+
+  prometheus:
+    image: prom/prometheus:v2.33.5
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./etc/prometheus:/workspace
+    command:
+      - '--config.file=/workspace/prometheus.yml'
+    networks:
+      back_network:
+        ipv4_address: 172.16.57.16
+
+  grafana:
+    image: grafana/grafana:8.4.3
+    ports:
+      - "3030:3000"
+    volumes:
+      - ./etc/grafana/:/etc/grafana/provisioning/datasources
+      - ./etc/dashboards.yaml:/etc/grafana/provisioning/dashboards/dashboards.yaml
+      - ./etc/dashboards:/etc/grafana/dashboards
+    depends_on:
+      - prometheus
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: "Admin"
+      GF_AUTH_DISABLE_LOGIN_FORM: "true"
+    networks:
+      back_network:
+        ipv4_address: 172.16.57.17
 
 networks:
   back_network:
