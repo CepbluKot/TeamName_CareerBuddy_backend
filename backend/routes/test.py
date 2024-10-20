@@ -8,7 +8,6 @@ from schemas.employees import Employees as employees_schema
 import schemas.career_goals
 import schemas.feedback
 from settings import db
-from uuid import UUID, uuid4
 
 
 api = APIBlueprint(

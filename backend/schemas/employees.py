@@ -1,13 +1,12 @@
 from settings import db
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import mapped_column
-from sqlalchemy.dialects.postgresql import UUID, ARRAY
-import uuid
+from sqlalchemy.dialects.postgresql import ARRAY
 
 
 class Employees(db.Model):
     __tablename__ = 'employees'
-    id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
     surname = db.Column(db.String)
     email = db.Column(db.String)
