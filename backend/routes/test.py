@@ -12,21 +12,18 @@ from uuid import UUID, uuid4
 
 
 api = APIBlueprint(
-    '/employees',
+    '/test',
     __name__,
-    url_prefix='/employees',
+    url_prefix='/test',
     # abp_tags=[tag],
     # abp_security=security,
     # abp_responses={"401": Unauthorized},
     # disable openapi UI
     doc_ui=True
 )
-employees_tag = Tag(name='employees', description='employees api')
+employees_tag = Tag(name='test', description='test api')
 
 
-@api.post("/employee", tags=[employees_tag])
-def add_employee(body: employee_model):
-    employee_db_record = employees_schema(**body.dict())
-    db.session.add(employee_db_record)
-    db.session.commit()
+@api.get("/test", )
+def testing():
     return {"code": 0, "message": "ok"}, HTTPStatus.OK

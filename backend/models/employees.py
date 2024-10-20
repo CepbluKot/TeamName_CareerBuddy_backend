@@ -8,7 +8,7 @@ class Employees(BaseModel):
     name: str = Field(None)
     surname: str = Field(None)
     email: str = Field(None)
-    department: str = Field(None)
+    department_id: int = Field(None)
     role_id: int = Field(None)
     experience: float = Field(None)
     age: int = Field(None)
