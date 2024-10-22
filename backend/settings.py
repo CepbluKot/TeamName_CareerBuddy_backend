@@ -5,8 +5,10 @@ from flask_cors import CORS, cross_origin
 from flask_openapi3 import Info, Tag
 from flask_openapi3 import OpenAPI
 from flask_jwt_extended import JWTManager
+from sqlalchemy import create_engine
 
 from utils import setting_statsd, StatsdMiddleware
+
 
 
 UPLOAD_FOLDER = './files'
@@ -27,3 +29,6 @@ app.wsgi_app = StatsdMiddleware(app.wsgi_app, "flask-monitoring")
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 db = SQLAlchemy(app)
 jwt = JWTManager(app)
+
+
+engine = create_engine("postgresql+psycopg2://postgres:admin@postgres-backend:5432/project")

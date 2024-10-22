@@ -29,3 +29,5 @@ flask_openapi3==4.0.1
 datadog==0.44.0
 flask-openapi3-swagger
 Flask-JWT-Extended
+pandas
+faker
