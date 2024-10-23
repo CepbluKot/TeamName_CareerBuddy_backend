@@ -271,7 +271,7 @@ services:
 
   back:
     build: ./backend
-    restart: always
+    # restart: always
 
     ports:
       - "8000:8000"

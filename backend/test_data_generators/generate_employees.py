@@ -6,11 +6,16 @@ from faker import Faker
 from settings import db
 
 from schemas.employees import Employees as employees_schema
+from schemas.employees_auth import EmployeesAuth as employees_auth_schema 
+
 
 f = Faker()
 
 def generate_employees():
     df = pd.read_csv('dataset.csv')
+
+    login_id = 0
+
     for index, row in df.iterrows():
         job_role =  row["JobRole"]
         department =  row["Department"]
@@ -49,5 +54,26 @@ def generate_employees():
         )
 
         db.session.add(employee_db_record)
+        try:
+            db.session.flush()
+        except Exception as e:
+            db.session.rollback()
+            logging.error(f'error occupied during flushing employees: {e}')
+
+        
+        new_employee_id = employee_db_record.id
+
+        employee_auth_db_schema = employees_auth_schema(login=f'login_{login_id}',
+                                                        password='1',
+                                                        is_active=True,
+                                                        employee_id=new_employee_id)
+
+        db.session.add(employee_auth_db_schema)
     
-    db.session.commit()
+        login_id += 1
+    
+    try:
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        logging.error(f'error occupied during generating employees: {e}')

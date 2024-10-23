@@ -1,3 +1,4 @@
+import logging
 import pandas as pd
 from schemas.employees import Departments
 from settings import db
@@ -12,4 +13,9 @@ def generate_departments():
         department_db_record = Departments( name=department )
         
         db.session.add(department_db_record)
-    db.session.commit()
+
+    try:
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        logging.error(f'error occupied during generating departments: {e}')
