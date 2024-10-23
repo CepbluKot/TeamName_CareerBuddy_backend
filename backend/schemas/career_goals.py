@@ -8,10 +8,9 @@ class CareerGoals(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     employee_id = mapped_column(ForeignKey("employees.id"))
     name = db.Column(db.String)
-    from_content = db.Column(db.String)
-    to_content = db.Column(db.String)
-    date_sent = db.Column(db.DateTime)
-    date_answered = db.Column(db.DateTime)
+    description = db.Column(db.String)
+    start_date = db.Column(db.DateTime)
+    end_date = db.Column(db.DateTime)
 
 
 class GoalCheckpoints(db.Model):
