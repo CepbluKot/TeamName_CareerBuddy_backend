@@ -1,6 +1,6 @@
 from settings import db
 from sqlalchemy import ForeignKey
-from sqlalchemy.orm import mapped_column
+from sqlalchemy.orm import mapped_column, relationship, Mapped
 from sqlalchemy.dialects.postgresql import ARRAY
 
 
@@ -10,8 +10,8 @@ class Employees(db.Model):
     name = db.Column(db.String)
     surname = db.Column(db.String)
     email = db.Column(db.String)
-    department_id = mapped_column(ForeignKey("departments.id"))
-    role_id = mapped_column(ForeignKey("roles.id"))
+    department_id = mapped_column(db.Integer, ForeignKey("departments.id"))
+    role_id = mapped_column(db.Integer, ForeignKey("roles.id"))
     experience = db.Column(db.Float)
     age = db.Column(db.Integer)
     business_travel = db.Column(ARRAY(db.String))
