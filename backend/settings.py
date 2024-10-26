@@ -7,9 +7,9 @@ from flask_openapi3 import Info, Tag
 from flask_openapi3 import OpenAPI
 from flask_jwt_extended import JWTManager
 from sqlalchemy import create_engine
+from flask_admin import Admin
 
 from utils import setting_statsd, StatsdMiddleware
-
 
 
 UPLOAD_FOLDER = './files'
@@ -30,6 +30,8 @@ security = [
 info = Info(title="book API", version="1.0.0")
 app = OpenAPI(__name__, info=info, security_schemes=security_schemes)
 cors = CORS(app)
+admin = Admin(app, name='CareerBuddy')
+
 app.config['CORS_HEADERS'] = 'Content-Type'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://postgres:admin@postgres-backend:5432/project'
 
