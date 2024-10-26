@@ -27,7 +27,7 @@ security = [
     {"jwt": []}
 ]
 
-info = Info(title="book API", version="1.0.0")
+info = Info(title="CareerBuddy API", version="1.0.0")
 app = OpenAPI(__name__, info=info, security_schemes=security_schemes)
 cors = CORS(app)
 admin = Admin(app, name='CareerBuddy')
