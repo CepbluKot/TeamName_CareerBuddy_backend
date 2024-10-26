@@ -31,3 +31,4 @@ flask-openapi3-swagger
 Flask-JWT-Extended
 pandas
 faker
+Flask-Admin
