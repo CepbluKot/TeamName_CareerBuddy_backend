@@ -1,9 +1,10 @@
 import logging
 import random
+import datetime
 import faker
 from http import HTTPStatus
 from pydantic import BaseModel
-from flask import Response
+from flask import Response, jsonify
 from flask_openapi3 import Info, Tag
 from flask_openapi3 import APIBlueprint, OpenAPI
 from models.employees_auth import EmployeesAuth
@@ -11,9 +12,10 @@ from models.employees import Employees as employees_model
 from schemas.employees_auth import EmployeesAuth as employees_auth_schema
 
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity, get_jwt
-from settings import db
+from settings import db, token_live_time
 from sqlalchemy import select
 from schemas.employees import Roles, Departments, Employees as employees_schema
+from flask_jwt_extended import create_access_token
 
 
 api = APIBlueprint(
@@ -42,6 +44,21 @@ def register(body: EmployeesAuth):
     educations = list(db.session.execute(select(employees_schema.education).distinct()).scalars().all())
     education_fields = list(db.session.execute(select(employees_schema.education_field).distinct()).scalars().all())
     
+    if not role_ids:
+        role_ids = [1]
+    
+    if not department_ids:
+        department_ids = [1]
+    
+    if not business_travels:
+        business_travels = ["Travel_Rarely"]
+    
+    if not educations:
+        educations = [1]
+    
+    if not education_fields:
+        education_fields = ["Other"]
+        
     last_employee_num = db.session.execute(select(employees_schema.employee_number).order_by(employees_schema.employee_number.desc())).scalar()
     if not last_employee_num:
         last_employee_num = 0
@@ -104,5 +121,33 @@ def register(body: EmployeesAuth):
     except Exception as e:
         db.session.rollback()
         logging.error(f'error occupied during registering employee: {e}')
+
+    return {"code": 0, "message": "ok"}, HTTPStatus.OK
+
+
+@api.post("/login", )
+def login(body: EmployeesAuth):
+    login_in_db = db.session.execute(select(employees_auth_schema.login).where(employees_auth_schema.login == body.login)).scalar()
+    if not login_in_db:
+        return {"code": 1, "message": "user with this login not registered"}, HTTPStatus.BAD_REQUEST
+
+    password_in_db = db.session.execute(select(employees_auth_schema.password).where(employees_auth_schema.password == body.password).where(employees_auth_schema.login == body.login)).scalar()
+    
+    if not password_in_db:
+        return {"code": 1, "message": "wrong password"}, HTTPStatus.BAD_REQUEST
+
+    access_token = create_access_token(identity=login_in_db, expires_delta=token_live_time)
+    return jsonify(access_token=access_token)
+
+
+    # return {"code": 0, "message": "ok"}, HTTPStatus.OK
+
+
+@api.post("/refresh_token", )
+@jwt_required()
+def refresh_token():
+    identity = get_jwt_identity()
+    access_token = create_access_token(identity=identity)
+    return jsonify(access_token=access_token)
 
     return {"code": 0, "message": "ok"}, HTTPStatus.OK
