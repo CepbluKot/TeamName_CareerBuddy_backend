@@ -13,7 +13,6 @@ from schemas.employees import Employees
 
 def generate_test_data():
     with app.app_context():
-        print('start generating')
         generate_departments()
         generate_roles()
         generate_employees()
@@ -24,4 +23,3 @@ def generate_test_data():
             generate_goals(employee_id=id)
 
         generate_feedback()
-        print('stop generating')

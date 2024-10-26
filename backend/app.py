@@ -19,10 +19,10 @@ app.register_api(test_api)
 
 
 if __name__ == '__main__':
-    # data_generator_thr = threading.Thread(target=generate_test_data)
-    # data_generator_thr.daemon = True
-    # data_generator_thr.start()
+    data_generator_thr = threading.Thread(target=generate_test_data)
+    data_generator_thr.daemon = True
+    data_generator_thr.start()
 
-    # app.run(debug=False, port=8000, host='0.0.0.0')
+    app.run(debug=False, port=8000, host='0.0.0.0')
 
     generate_test_data()

@@ -1,12 +1,12 @@
 from settings import db
-from sqlalchemy import ForeignKey
+from sqlalchemy import ForeignKey, func
 from sqlalchemy.orm import mapped_column, relationship, Mapped
 from sqlalchemy.dialects.postgresql import ARRAY
 
 
 class Employees(db.Model):
     __tablename__ = 'employees'
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String)
     surname = db.Column(db.String)
     email = db.Column(db.String)
@@ -14,11 +14,11 @@ class Employees(db.Model):
     role_id = mapped_column(db.Integer, ForeignKey("roles.id"))
     experience = db.Column(db.Float)
     age = db.Column(db.Integer)
-    business_travel = db.Column(ARRAY(db.String))
+    business_travel = db.Column(db.String)
     daily_rate = db.Column(db.Integer)
     distance_from_home = db.Column(db.Integer)
     education = db.Column(db.Integer)
-    education_field = db.Column(ARRAY(db.String))
+    education_field = db.Column(db.String)
     employee_number = db.Column(db.Integer)
     relationship_satisfaction = db.Column(db.Integer)
     standard_hours = db.Column(db.Integer)
