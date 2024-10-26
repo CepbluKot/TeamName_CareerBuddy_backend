@@ -9,7 +9,7 @@ from flask_openapi3 import APIBlueprint, OpenAPI
 from models.employees import Employees as employee_model
 from schemas.employees import Employees as employees_schema
 from flask_jwt_extended import jwt_required
-from settings import db
+from settings import db, security
 
 from sqlalchemy import select
 from schemas.employees import Roles
@@ -29,7 +29,7 @@ employees_tag = Tag(name='test', description='test api')
 
 
 
-@api.get("/test", )
+@api.get("/test", security=security)
 @jwt_required()
 def testing():
     # try:

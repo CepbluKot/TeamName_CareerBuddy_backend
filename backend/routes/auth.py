@@ -12,7 +12,7 @@ from models.employees import Employees as employees_model
 from schemas.employees_auth import EmployeesAuth as employees_auth_schema
 
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity, get_jwt
-from settings import db, token_live_time
+from settings import db, token_live_time, security
 from sqlalchemy import select
 from schemas.employees import Roles, Departments, Employees as employees_schema
 from flask_jwt_extended import create_access_token
@@ -143,7 +143,7 @@ def login(body: EmployeesAuth):
     # return {"code": 0, "message": "ok"}, HTTPStatus.OK
 
 
-@api.post("/refresh_token", )
+@api.post("/refresh_token", security=security)
 @jwt_required()
 def refresh_token():
     identity = get_jwt_identity()

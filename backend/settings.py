@@ -14,8 +14,21 @@ from utils import setting_statsd, StatsdMiddleware
 
 UPLOAD_FOLDER = './files'
 
+jwt = {
+  "type": "http",
+  "scheme": "bearer",
+  "bearerFormat": "JWT"
+}
+
+
+security_schemes = {"jwt": jwt}
+
+security = [
+    {"jwt": []}
+]
+
 info = Info(title="book API", version="1.0.0")
-app = OpenAPI(__name__, info=info)
+app = OpenAPI(__name__, info=info, security_schemes=security_schemes)
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://postgres:admin@postgres-backend:5432/project'
@@ -23,6 +36,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://postgres:admin@po
 app.config['SECRET_KEY'] = 'rofl'
 app.config["JWT_SECRET_KEY"] = 'prikol'
 app.config['JWT_TOKEN_LOCATION'] = ['headers']
+
 
 setting_statsd()
 app.wsgi_app = StatsdMiddleware(app.wsgi_app, "flask-monitoring")
