@@ -1,10 +1,10 @@
 from pydantic import BaseModel, Field
-from uuid import UUID, uuid4
 from typing import List
+from pydantic.json_schema import SkipJsonSchema
 
 
 class Employees(BaseModel):
-    id: UUID = Field(default_factory=uuid4)
+    id: SkipJsonSchema[int] = Field(None)
     name: str = Field(None)
     surname: str = Field(None)
     email: str = Field(None)
@@ -12,11 +12,11 @@ class Employees(BaseModel):
     role_id: int = Field(None)
     experience: float = Field(None)
     age: int = Field(None)
-    business_travel: List[str] = Field(None)
+    business_travel: str = Field(None)
     daily_rate: int = Field(None)
     distance_from_home: int = Field(None)
     education: int = Field(None)
-    education_field: List[str] = Field(None)
+    education_field: str = Field(None)
     employee_number: int = Field(None)
     relationship_satisfaction: int = Field(None)
     standard_hours: int = Field(None)
@@ -34,7 +34,7 @@ class Employees(BaseModel):
 
 
 class Roles(BaseModel):
-    id: int = Field(None)
+    id: SkipJsonSchema[int] = Field(None)
     name: str = Field(None)
     admin_page: bool = Field(None)
     feedback_page: bool = Field(None)
@@ -45,7 +45,7 @@ class Roles(BaseModel):
 
 
 class Departments(BaseModel):
-    id: int = Field(None)
+    id: SkipJsonSchema[int] = Field(None)
     name: str = Field(None)
     
     class Config:

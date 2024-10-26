@@ -1,3 +1,6 @@
+import logging
+import schemas.feedback
+import pandas as pd
 from http import HTTPStatus
 from pydantic import BaseModel
 from flask import Response
@@ -5,10 +8,11 @@ from flask_openapi3 import Info, Tag
 from flask_openapi3 import APIBlueprint, OpenAPI
 from models.employees import Employees as employee_model
 from schemas.employees import Employees as employees_schema
-import schemas.career_goals
-import schemas.feedback
-from settings import db
-from uuid import UUID, uuid4
+from flask_jwt_extended import jwt_required
+from settings import db, security
+
+from sqlalchemy import select
+from schemas.employees import Roles
 
 
 api = APIBlueprint(
@@ -24,6 +28,13 @@ api = APIBlueprint(
 employees_tag = Tag(name='test', description='test api')
 
 
-@api.get("/test", )
+
+@api.get("/test", security=security)
+@jwt_required()
 def testing():
+    # try:
+        
     return {"code": 0, "message": "ok"}, HTTPStatus.OK
+
+    # except Exception as e:
+    #     return {"code": 1, "message": "not_ok", "err": str(e)}, HTTPStatus.BAD_REQUEST
