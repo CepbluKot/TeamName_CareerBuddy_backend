@@ -72,3 +72,12 @@ class Departments(BaseModel):
     class Config:
         orm_mode = True
         from_attributes = True
+
+
+
+class DepartmentsResponseList(RootModel[Any]):
+    root: List[Departments]
+
+
+class RolesResponseList(RootModel[Any]):
+    root: List[Roles]

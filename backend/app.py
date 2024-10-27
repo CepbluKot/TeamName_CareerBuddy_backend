@@ -7,6 +7,8 @@ from routes.auth import api as auth_api
 from routes.test import api as test_api
 from routes.feedback import api as feedback_api
 from routes.career_goals import api as career_goals_api
+from routes.departments import api as departments_api
+from routes.roles import api as roles_api
 
 from test_data_generators.generate_all import generate_test_data
 
@@ -21,6 +23,8 @@ app.register_api(auth_api)
 app.register_api(test_api)
 app.register_api(feedback_api)
 app.register_api(career_goals_api)
+app.register_api(departments_api)
+app.register_api(roles_api)
 
 
 admin.add_view(ModelView(CareerGoals, db.session))
