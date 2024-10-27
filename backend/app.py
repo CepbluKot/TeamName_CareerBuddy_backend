@@ -34,7 +34,6 @@ admin.add_view(ModelView(Feedback, db.session))
 admin.add_view(ModelView(FeedbackTemplates, db.session))
 admin.add_view(ModelView(EmployeesAuth, db.session))
 admin.add_view(ModelView(Employees, db.session))
-admin.add_view(ModelView(EmployeesAuth, db.session))
 admin.add_view(ModelView(Roles, db.session))
 admin.add_view(ModelView(Departments, db.session))
 
