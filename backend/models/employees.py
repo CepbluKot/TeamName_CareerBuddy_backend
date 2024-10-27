@@ -35,13 +35,19 @@ class Employees(BaseModel):
         from_attributes=True
 
 
-class EmployeesResponse(RootModel[Any]):
-    root: List[Employees]
+class EmployeesResponse(Employees):
+    role_name: str = ""
+    department_name: str = ""
+
+
+class EmployeesResponseList(RootModel[Any]):
+    root: List[EmployeesResponse]
 
 
 class GetAllEmployees(BaseModel):
     skip: int = 0
     limit: int = 100
+
 
 class GetEmployeeByIDParams(BaseModel):
     id: int
