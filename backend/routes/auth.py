@@ -88,7 +88,7 @@ async def register(body: EmployeesAuthRegister):
         )
     ).scalar()
     if not last_employee_num:
-        last_employee_num = 0
+        last_employee_num = 1
 
     age = random.randint(20, 100)
     total_working_years = random.randint(5, age)
@@ -99,7 +99,7 @@ async def register(body: EmployeesAuthRegister):
     years_with_cur_manager = random.randint(1, years_in_current_role)
 
     employee_db_record = employees_schema(
-        id=None,
+        id=last_employee_num,
         name=f.name()[0],
         surname=f.name()[1],
         email=f.email(),
@@ -161,22 +161,15 @@ async def register(body: EmployeesAuthRegister):
     "/login",
 )
 async def login(body: EmployeesAuth):
-    login_in_db = db.session.execute(
-        select(employees_auth_schema.login).where(
-            employees_auth_schema.login == body.login
-        )
-    ).scalar()
-    if not login_in_db:
-        return {
-            "msg": "user with this login not registered",
-        }, HTTPStatus.BAD_REQUEST
-
     id_in_db = db.session.execute(
         select(employees_auth_schema.employee_id).where(
             employees_auth_schema.login == body.login
         )).scalar()
-    
-    print('employee id', id_in_db)
+    if not id_in_db:
+        return {
+            "msg": "user with this login not registered",
+        }, HTTPStatus.BAD_REQUEST
+    print('id in db', id_in_db)
 
     password_in_db = db.session.execute(
         select(employees_auth_schema.password)
@@ -187,12 +180,18 @@ async def login(body: EmployeesAuth):
     if not password_in_db:
         return { "msg": "wrong password"}, HTTPStatus.BAD_REQUEST
 
-    employee_data = db.session.execute(
-        select(employees_schema, Roles.name)
-        .where(employees_auth_schema.login == body.login)
-        .join(Roles, employees_schema.role_id == Roles.id)
-    ).fetchone()
-    identity = {"id": id_in_db, "role": employee_data[1]}
+    
+    role_id = db.session.execute(
+        select(employees_schema.role_id)
+        .where(employees_schema.id == id_in_db)
+    ).scalar()
+
+    role_name = db.session.execute(
+        select(Roles.name)
+        .where(Roles.id == role_id)
+    ).scalar()
+
+    identity = {"id": id_in_db, "role": role_name}
 
     access_token = create_access_token(identity=identity, expires_delta=token_live_time)
     return jsonify(access_token=access_token)

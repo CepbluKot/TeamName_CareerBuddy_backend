@@ -81,8 +81,8 @@ async def get_employee(query: GetEmployeeByIDParams):
     employee_data = db.session.execute(
         select(
             employees_schema,
-            departments_schema.name.label("department_name"),
-            roles_schema.name.label("role_name"),
+            departments_schema.name,
+            roles_schema.name,
         )
         .join(
             departments_schema,
@@ -90,7 +90,9 @@ async def get_employee(query: GetEmployeeByIDParams):
         )
         .join(roles_schema, employees_schema.role_id == roles_schema.id)
         .where(employees_schema.id == query.id)
-    ).fetchone()
+    ).scalar()
+
+    print('employee data', employee_data, query.id)
 
     if not employee_data:
         return {
@@ -132,7 +134,7 @@ async def get_filtered_employees(query: GetFilteredEmployees):
 )
 @jwt_required()
 @role_required([])
-async def get_my_profile(query: GetFilteredEmployees):
+async def get_my_profile():
     current_user = get_jwt_identity()
     current_user_id = current_user.get("id")
 
