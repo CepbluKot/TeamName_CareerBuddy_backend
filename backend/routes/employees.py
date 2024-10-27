@@ -25,6 +25,8 @@ from typing import List
 from settings import db
 from services.employees import get_filtered_employees as get_filtered_employees_func
 
+from decorators.auth import role_required
+
 
 api = APIBlueprint("/employees", __name__, url_prefix="/employees", doc_ui=True)
 employees_tag = Tag(name="employees", description="employees api")
@@ -35,6 +37,7 @@ employees_tag = Tag(name="employees", description="employees api")
     tags=[employees_tag],
     responses={HTTPStatus.OK: EmployeesResponseList},
 )
+@role_required([])
 def get_all_employees(query: GetAllEmployees):
     # department_name_alias = aliased(Departments, name='user2')
 
@@ -68,6 +71,7 @@ def get_all_employees(query: GetAllEmployees):
 @api.get(
     "/get_employee", tags=[employees_tag], responses={HTTPStatus.OK: EmployeesResponse}
 )
+@role_required([])
 def get_employee(query: GetEmployeeByIDParams):
     employee_data = db.session.execute(
         select(
@@ -85,8 +89,7 @@ def get_employee(query: GetEmployeeByIDParams):
 
     if not employee_data:
         return {
-            "code": 1,
-            "message": "employee with this id doesnt exist",
+            "msg": "employee with this id doesnt exist",
         }, HTTPStatus.BAD_REQUEST
 
     parsed = EmployeesResponse.from_orm(employee_data[0])
@@ -101,6 +104,7 @@ def get_employee(query: GetEmployeeByIDParams):
     tags=[employees_tag],
     responses={HTTPStatus.OK: EmployeesResponseList},
 )
+@role_required([])
 def get_filtered_employees(query: GetFilteredEmployees):
 
     parsed_employees = get_filtered_employees_func(

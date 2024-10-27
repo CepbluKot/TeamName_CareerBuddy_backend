@@ -34,6 +34,8 @@ from settings import db
 from services.employees import get_filtered_employees as get_filtered_employees_func
 from datetime import datetime
 
+from decorators.auth import role_required
+
 
 api = APIBlueprint("/feedback", __name__, url_prefix="/feedback", doc_ui=True)
 feedback_tag = Tag(name="feedback", description="employees api")
@@ -44,6 +46,7 @@ feedback_tag = Tag(name="feedback", description="employees api")
     tags=[feedback_tag],
     responses={HTTPStatus.OK: FeedbackList},
 )
+@role_required(["Human Resources"])
 def get_filtered_feedback(query: GetFilteredFeedback):
     filtered_feedback_query = select(feedback_schema)
 
@@ -83,8 +86,6 @@ def get_filtered_feedback(query: GetFilteredFeedback):
 
     all_feedback = db.session.execute(filtered_feedback_query).scalars().all()
 
-    print("got filtered feedback ", all_feedback)
-
     parsed_feedback = []
 
     for feedback in all_feedback:
@@ -99,6 +100,7 @@ def get_filtered_feedback(query: GetFilteredFeedback):
     tags=[feedback_tag],
     responses={HTTPStatus.OK: FeedbackList},
 )
+@role_required(["Human Resources"])
 def get_all_feedback(query: GetAllFeedback):
     all_feedback = (
         db.session.execute(
@@ -122,6 +124,7 @@ def get_all_feedback(query: GetAllFeedback):
     tags=[feedback_tag],
     responses={HTTPStatus.OK: FeedbackTemplateList},
 )
+@role_required(["Human Resources"])
 def get_all_feedback_templates(query: GetAllFeedback):
     all_feedback = (
         db.session.execute(
@@ -145,6 +148,7 @@ def get_all_feedback_templates(query: GetAllFeedback):
     tags=[feedback_tag],
     responses={HTTPStatus.OK: FeedbackTemplateList},
 )
+@role_required(["Human Resources"])
 def get_users_feedback_template(query: GetUsersFeedbackTemplate):
     all_feedback = (
         db.session.execute(
@@ -167,6 +171,7 @@ def get_users_feedback_template(query: GetUsersFeedbackTemplate):
 
 
 @api.post("/create_feedback_template", tags=[feedback_tag])
+@role_required(["Human Resources"])
 def create_feedback_template(body: feedback_template_model):
 
     new_feedback_template = feedback_template_schema(
@@ -180,13 +185,14 @@ def create_feedback_template(body: feedback_template_model):
         db.session.rollback()
         logging.error("error occupied during creation of new feedback template")
 
-    return {"code": 0, "message": "ok"}, HTTPStatus.OK
+    return {"msg": "ok"}, HTTPStatus.OK
 
 
 @api.post(
     "/create_feedback",
     tags=[feedback_tag],
 )
+@role_required(["Human Resources"])
 def create_feedback(body: CreateFeedback):
     does_template_exists = db.session.execute(
         select(feedback_template_schema).where(
@@ -196,8 +202,7 @@ def create_feedback(body: CreateFeedback):
 
     if not does_template_exists:
         return {
-            "code": 1,
-            "message": "feedback template doesnt exist",
+            "msg": "feedback template doesnt exist",
         }, HTTPStatus.BAD_REQUEST
 
     filtered_employees = get_filtered_employees_func(
@@ -219,20 +224,21 @@ def create_feedback(body: CreateFeedback):
         db.session.rollback()
         logging.error("error occupied during creation of new feedback")
 
-    return {"code": 0, "message": "ok"}, HTTPStatus.OK
+    return {"msg": "ok"}, HTTPStatus.OK
 
 
 @api.post(
     "/create_feedback_answer",
     tags=[feedback_tag],
 )
+@role_required([])
 def create_feedback_answer(body: CreateFeedbackAnswer):
     feedback = db.session.execute(
         select(feedback_schema).where(feedback_schema.id == body.feedback_id)
     ).scalar()
 
     if not feedback:
-        return {"code": 1, "message": "feedback doesnt exist"}, HTTPStatus.BAD_REQUEST
+        return {"msg": "feedback doesnt exist"}, HTTPStatus.BAD_REQUEST
 
     feedback_answer = feedback_model.from_orm(feedback)
     feedback_answer.answer_content = body.answer_content
@@ -244,4 +250,4 @@ def create_feedback_answer(body: CreateFeedbackAnswer):
         db.session.rollback()
         logging.error("error occupied during creation of feedback answer")
 
-    return {"code": 0, "message": "ok"}, HTTPStatus.OK
+    return { "msg": "ok"}, HTTPStatus.OK

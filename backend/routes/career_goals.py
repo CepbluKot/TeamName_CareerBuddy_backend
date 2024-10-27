@@ -26,6 +26,7 @@ from sqlalchemy.orm import aliased
 from typing import List
 
 from settings import db
+from decorators.auth import role_required
 
 
 api = APIBlueprint("/career_goals", __name__, url_prefix="/career_goals", doc_ui=True)
@@ -37,6 +38,7 @@ career_goals_tag = Tag(name="career_goals", description="career goals api")
     tags=[career_goals_tag],
     responses={HTTPStatus.OK: CareerGoalsWithGoalCheckpointsList},
 )
+@role_required([])
 def get_all_career_goals(query: GetAllFeedbackFilter):
     all_career_goals = (
         db.session.execute(
@@ -83,6 +85,7 @@ def get_all_career_goals(query: GetAllFeedbackFilter):
     tags=[career_goals_tag],
     responses={HTTPStatus.OK: CareerGoalsWithGoalCheckpointsList},
 )
+@role_required([])
 def get_filtered_career_goals(query: GetFilteredFeedbackFilter):
     employee_alias_for_department_id = aliased(employees_schema)
     employee_alias_for_role_id = aliased(employees_schema)
@@ -116,7 +119,6 @@ def get_filtered_career_goals(query: GetFilteredFeedbackFilter):
 
     all_career_goals = db.session.execute(filtered_career_goals).scalars().all()
 
-    print("career goals filter res ", all_career_goals)
 
     parsed = []
 
@@ -151,12 +153,13 @@ def get_filtered_career_goals(query: GetFilteredFeedbackFilter):
 
 
 @api.post("/create_career_goal", tags=[career_goals_tag])
+@role_required([])
 def create_career_goal(body: career_goals_model):
     does_employee_exists = db.session.execute(
         select(employees_schema).filter(employees_schema.id == body.employee_id)
     ).scalar()
     if not does_employee_exists:
-        return {"code": 1, "message": "employee doesnt exist"}, HTTPStatus.BAD_REQUEST
+        return { "msg": "employee doesnt exist"}, HTTPStatus.BAD_REQUEST
 
     career_goal_db_record = career_goals_schema(
         employee_id=body.employee_id,
@@ -174,10 +177,11 @@ def create_career_goal(body: career_goals_model):
         db.session.rollback()
         logging.info("error occupied during creation of career goal")
 
-    return {"code": 0, "message": "ok"}, HTTPStatus.OK
+    return {"msg": "ok"}, HTTPStatus.OK
 
 
 @api.post("/create_goal_checkpoint", tags=[career_goals_tag])
+@role_required([])
 def create_goal_checkpoint(body: goal_checkpoint_model):
     does_career_goal_exists = db.session.execute(
         select(career_goals_schema).filter(
@@ -186,8 +190,7 @@ def create_goal_checkpoint(body: goal_checkpoint_model):
     ).scalar()
     if not does_career_goal_exists:
         return {
-            "code": 1,
-            "message": "career goals doesnt exist",
+            "msg": "career goals doesnt exist",
         }, HTTPStatus.BAD_REQUEST
 
     goal_checkpoint_db_record = goal_checkpoint_schema(
@@ -205,4 +208,4 @@ def create_goal_checkpoint(body: goal_checkpoint_model):
         db.session.rollback()
         logging.info("error occupied during creation of career goal")
 
-    return {"code": 0, "message": "ok"}, HTTPStatus.OK
+    return { "msg": "ok"}, HTTPStatus.OK

@@ -32,11 +32,8 @@ employees_tag = Tag(name="test", description="test api")
 
 @api.get("/test", security=security)
 @jwt_required()
-@role_required(["Human Resources"])
+@role_required([])
 def testing():
     # try:
     current_user = get_jwt_identity()
-    return {"code": 0, "message": current_user}, HTTPStatus.OK
-
-    # except Exception as e:
-    #     return {"code": 1, "message": "not_ok", "err": str(e)}, HTTPStatus.BAD_REQUEST
+    return { "msg": current_user}, HTTPStatus.OK

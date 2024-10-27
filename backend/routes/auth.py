@@ -41,8 +41,7 @@ def register(body: EmployeesAuthRegister):
     ).scalar()
     if is_login_exists:
         return {
-            "code": 1,
-            "message": "user with this login already registered",
+            "msg": "user with this login already registered",
         }, HTTPStatus.BAD_REQUEST
 
     # role_ids = list(db.session.execute(select(Roles.id)).scalars())
@@ -145,7 +144,7 @@ def register(body: EmployeesAuthRegister):
         db.session.rollback()
         logging.error(f"error occupied during registering employee: {e}")
 
-    return {"code": 0, "message": "ok"}, HTTPStatus.OK
+    return {"msg": "ok"}, HTTPStatus.OK
 
 
 @api.post(
@@ -159,8 +158,7 @@ def login(body: EmployeesAuth):
     ).scalar()
     if not id_in_db:
         return {
-            "code": 1,
-            "message": "user with this login not registered",
+            "msg": "user with this login not registered",
         }, HTTPStatus.BAD_REQUEST
 
     password_in_db = db.session.execute(
@@ -170,7 +168,7 @@ def login(body: EmployeesAuth):
     ).scalar()
 
     if not password_in_db:
-        return {"code": 1, "message": "wrong password"}, HTTPStatus.BAD_REQUEST
+        return { "msg": "wrong password"}, HTTPStatus.BAD_REQUEST
 
     employee_data = db.session.execute(
         select(employees_schema, Roles.name)
