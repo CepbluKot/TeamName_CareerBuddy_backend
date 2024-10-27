@@ -1,10 +1,13 @@
 from http import HTTPStatus
 from pydantic import BaseModel
-from flask import Response
+from flask import Response, jsonify
 from flask_openapi3 import Info, Tag
 from flask_openapi3 import APIBlueprint, OpenAPI
-from models.employees import Employees as employee_model
+from models.employees import Employees as employees_model, EmployeesResponse, GetEmployeeByIDParams, GetAllEmployees
 from schemas.employees import Employees as employees_schema
+from sqlalchemy import select
+from typing import List
+
 from settings import db
 
 
@@ -12,18 +15,27 @@ api = APIBlueprint(
     '/employees',
     __name__,
     url_prefix='/employees',
-    # abp_tags=[tag],
-    # abp_security=security,
-    # abp_responses={"401": Unauthorized},
-    # disable openapi UI
     doc_ui=True
 )
 employees_tag = Tag(name='employees', description='employees api')
 
 
-@api.post("/employee", tags=[employees_tag])
-def add_employee(body: employee_model):
-    employee_db_record = employees_schema(**body.dict())
-    db.session.add(employee_db_record)
-    db.session.commit()
-    return {"code": 0, "message": "ok"}, HTTPStatus.OK
+@api.get("/all_employees", tags=[employees_tag], responses={HTTPStatus.OK: EmployeesResponse})
+def get_all_employees(query: GetAllEmployees):
+    all_employees = db.session.execute(select(employees_schema).offset(query.skip).limit(query.limit)).scalars().all()
+
+    parsed_employees = []
+    for employee in all_employees:
+        parsed_employees.append(employees_model.from_orm(employee).dict())
+
+    return parsed_employees
+
+
+@api.get("/get_employee", tags=[employees_tag], responses={HTTPStatus.OK: employees_model})
+def get_employee(query: GetEmployeeByIDParams):
+    employee_data = db.session.execute(select(employees_schema).where(employees_schema.id == query.id)).scalars().first()
+
+    if not employee_data:
+        return {"code": 1, "message": "employee with this id doesnt exist"}, HTTPStatus.BAD_REQUEST
+
+    return employees_model.from_orm(employee_data).dict()

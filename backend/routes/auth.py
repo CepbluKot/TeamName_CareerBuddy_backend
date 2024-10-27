@@ -22,10 +22,6 @@ api = APIBlueprint(
     '/auth',
     __name__,
     url_prefix='/auth',
-    # abp_tags=[tag],
-    # abp_security=security,
-    # abp_responses={"401": Unauthorized},
-    # disable openapi UI
     doc_ui=True
 )
 auth_tag = Tag(name='auth', description='auth api')
@@ -140,14 +136,9 @@ def login(body: EmployeesAuth):
     return jsonify(access_token=access_token)
 
 
-    # return {"code": 0, "message": "ok"}, HTTPStatus.OK
-
-
 @api.post("/refresh_token", security=security)
 @jwt_required()
 def refresh_token():
     identity = get_jwt_identity()
     access_token = create_access_token(identity=identity)
     return jsonify(access_token=access_token)
-
-    return {"code": 0, "message": "ok"}, HTTPStatus.OK

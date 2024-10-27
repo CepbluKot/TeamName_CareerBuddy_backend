@@ -3,11 +3,11 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_cors import CORS, cross_origin
+from flask_admin import Admin
 from flask_openapi3 import Info, Tag
 from flask_openapi3 import OpenAPI
 from flask_jwt_extended import JWTManager
 from sqlalchemy import create_engine
-from flask_admin import Admin
 
 from utils import setting_statsd, StatsdMiddleware
 
