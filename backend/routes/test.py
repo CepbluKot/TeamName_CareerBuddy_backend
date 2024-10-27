@@ -16,24 +16,23 @@ from schemas.employees import Roles
 
 
 api = APIBlueprint(
-    '/test',
+    "/test",
     __name__,
-    url_prefix='/test',
+    url_prefix="/test",
     # abp_tags=[tag],
     # abp_security=security,
     # abp_responses={"401": Unauthorized},
     # disable openapi UI
-    doc_ui=True
+    doc_ui=True,
 )
-employees_tag = Tag(name='test', description='test api')
-
+employees_tag = Tag(name="test", description="test api")
 
 
 @api.get("/test", security=security)
 @jwt_required()
 def testing():
     # try:
-        
+
     return {"code": 0, "message": "ok"}, HTTPStatus.OK
 
     # except Exception as e:

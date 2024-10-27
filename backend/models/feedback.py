@@ -13,7 +13,7 @@ class Feedback(BaseModel):
     answer_content: str = ""
     date_sent: SkipJsonSchema[datetime] = Field(None)
     date_answered: SkipJsonSchema[datetime] = Field(None)
-    
+
     class Config:
         orm_mode = True
         from_attributes = True

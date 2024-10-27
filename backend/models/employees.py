@@ -32,7 +32,7 @@ class Employees(BaseModel):
 
     class Config:
         orm_mode = True
-        from_attributes=True
+        from_attributes = True
 
 
 class EmployeesResponse(Employees):
@@ -59,7 +59,7 @@ class Roles(BaseModel):
     admin_page: bool = Field(None)
     feedback_page: bool = Field(None)
     career_goal_page: bool = Field(None)
-    
+
     class Config:
         orm_mode = True
         from_attributes = True
@@ -68,11 +68,10 @@ class Roles(BaseModel):
 class Departments(BaseModel):
     id: SkipJsonSchema[int] = Field(None)
     name: str = Field(None)
-    
+
     class Config:
         orm_mode = True
         from_attributes = True
-
 
 
 class DepartmentsResponseList(RootModel[Any]):

@@ -86,9 +86,7 @@ def get_filtered_career_goals(query: GetFilteredFeedbackFilter):
     employee_alias_for_department_id = aliased(employees_schema)
     employee_alias_for_role_id = aliased(employees_schema)
 
-
     filtered_career_goals = select(career_goals_schema)
-
 
     if query.employee_id != -1:
         filtered_career_goals = filtered_career_goals.filter(
@@ -97,12 +95,14 @@ def get_filtered_career_goals(query: GetFilteredFeedbackFilter):
 
     if query.department_id and query.department_id != -1:
         filtered_career_goals = filtered_career_goals.join(
-            employee_alias_for_department_id, employee_alias_for_department_id.id == career_goals_schema.employee_id
+            employee_alias_for_department_id,
+            employee_alias_for_department_id.id == career_goals_schema.employee_id,
         ).filter(employee_alias_for_department_id.department_id == query.department_id)
 
     if query.role_id and query.role_id != -1:
         filtered_career_goals = filtered_career_goals.join(
-            employee_alias_for_role_id, employee_alias_for_role_id.id == career_goals_schema.employee_id
+            employee_alias_for_role_id,
+            employee_alias_for_role_id.id == career_goals_schema.employee_id,
         ).filter(employee_alias_for_role_id.role_id == query.role_id)
 
     if query.skip and query.skip != -1:

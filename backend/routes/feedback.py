@@ -31,10 +31,9 @@ feedback_tag = Tag(name="feedback", description="employees api")
 )
 def get_filtered_feedback(query: GetFilteredFeedback):
     all_feedback_query = select(feedback_schema)
-    
+
     employee_alias_for_department_id = aliased(employees_schema)
     employee_alias_for_role_id = aliased(employees_schema)
-
 
     if query.to_employee_id and query.to_employee_id != -1:
         all_feedback_query = all_feedback_query.filter(
@@ -46,17 +45,17 @@ def get_filtered_feedback(query: GetFilteredFeedback):
             feedback_schema.from_employee_id == query.from_employee_id
         )
 
-
     if query.department_id and query.department_id != -1:
         all_feedback_query = all_feedback_query.join(
-            employee_alias_for_department_id, employee_alias_for_department_id.id == feedback_schema.to_employee_id
+            employee_alias_for_department_id,
+            employee_alias_for_department_id.id == feedback_schema.to_employee_id,
         ).filter(employee_alias_for_department_id.department_id == query.department_id)
 
     if query.role_id and query.role_id != -1:
         all_feedback_query = all_feedback_query.join(
-            employee_alias_for_role_id, employee_alias_for_role_id.id == feedback_schema.to_employee_id
+            employee_alias_for_role_id,
+            employee_alias_for_role_id.id == feedback_schema.to_employee_id,
         ).filter(employee_alias_for_role_id.role_id == query.role_id)
-
 
     if query.limit and query.limit != -1:
         all_feedback_query = all_feedback_query.limit(query.limit)
@@ -67,11 +66,9 @@ def get_filtered_feedback(query: GetFilteredFeedback):
     if query.skip and query.skip != -1:
         all_feedback_query = all_feedback_query.offset(query.skip)
 
-    all_feedback = db.session.execute(
-        all_feedback_query
-    ).scalars().all()
+    all_feedback = db.session.execute(all_feedback_query).scalars().all()
 
-    print('got filtered feedback ', all_feedback)
+    print("got filtered feedback ", all_feedback)
 
     parsed_feedback = []
 

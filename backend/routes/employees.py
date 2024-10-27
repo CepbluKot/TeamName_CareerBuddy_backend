@@ -36,23 +36,20 @@ employees_tag = Tag(name="employees", description="employees api")
 def get_all_employees(query: GetAllEmployees):
     # department_name_alias = aliased(Departments, name='user2')
 
-    all_employees = (
-        db.session.execute(
-            select(
-                employees_schema,
-                departments_schema.name.label("department_name"),
-                roles_schema.name.label("role_name"),
-            )
-            .join(
-                departments_schema,
-                employees_schema.department_id == departments_schema.id,
-            )
-            .join(roles_schema, employees_schema.role_id == roles_schema.id)
-            .limit(query.limit)
-            .offset(query.skip)
+    all_employees = db.session.execute(
+        select(
+            employees_schema,
+            departments_schema.name.label("department_name"),
+            roles_schema.name.label("role_name"),
         )
-        .fetchall()
-    )
+        .join(
+            departments_schema,
+            employees_schema.department_id == departments_schema.id,
+        )
+        .join(roles_schema, employees_schema.role_id == roles_schema.id)
+        .limit(query.limit)
+        .offset(query.skip)
+    ).fetchall()
 
     parsed_employees = []
 
@@ -60,9 +57,9 @@ def get_all_employees(query: GetAllEmployees):
         parsed = EmployeesResponse.from_orm(employee)
         parsed.role_name = role_name
         parsed.department_name = department_name
-        
+
         parsed_employees.append(parsed.dict())
-    
+
     return parsed_employees
 
 
@@ -70,22 +67,19 @@ def get_all_employees(query: GetAllEmployees):
     "/get_employee", tags=[employees_tag], responses={HTTPStatus.OK: EmployeesResponse}
 )
 def get_employee(query: GetEmployeeByIDParams):
-    employee_data = (
-        db.session.execute(
-            select(
-                employees_schema,
-                departments_schema.name.label("department_name"),
-                roles_schema.name.label("role_name"),
-            )
-            .join(
-                departments_schema,
-                employees_schema.department_id == departments_schema.id,
-            )
-            .join(roles_schema, employees_schema.role_id == roles_schema.id)
-            .where(employees_schema.id == query.id)
+    employee_data = db.session.execute(
+        select(
+            employees_schema,
+            departments_schema.name.label("department_name"),
+            roles_schema.name.label("role_name"),
         )
-        .fetchone()
-    )
+        .join(
+            departments_schema,
+            employees_schema.department_id == departments_schema.id,
+        )
+        .join(roles_schema, employees_schema.role_id == roles_schema.id)
+        .where(employees_schema.id == query.id)
+    ).fetchone()
 
     if not employee_data:
         return {

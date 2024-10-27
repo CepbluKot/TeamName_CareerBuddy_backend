@@ -5,7 +5,7 @@ from sqlalchemy.dialects.postgresql import ARRAY
 
 
 class Employees(db.Model):
-    __tablename__ = 'employees'
+    __tablename__ = "employees"
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String)
     surname = db.Column(db.String)
@@ -33,7 +33,7 @@ class Employees(db.Model):
 
 
 class Roles(db.Model):
-    __tablename__ = 'roles'
+    __tablename__ = "roles"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
     admin_page = db.Column(db.Boolean)
@@ -42,6 +42,6 @@ class Roles(db.Model):
 
 
 class Departments(db.Model):
-    __tablename__ = 'departments'
+    __tablename__ = "departments"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)

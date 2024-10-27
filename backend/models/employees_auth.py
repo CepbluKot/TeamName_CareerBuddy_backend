@@ -8,7 +8,7 @@ class EmployeesAuth(BaseModel):
     login: str = Field(None)
     password: str = Field(None)
     is_active: SkipJsonSchema[bool] = Field(True)
-    
+
     class Config:
         orm_mode = True
         from_attributes = True

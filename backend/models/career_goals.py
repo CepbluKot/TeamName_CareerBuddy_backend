@@ -12,10 +12,11 @@ class CareerGoals(BaseModel):
     description: str = Field(None)
     start_date: SkipJsonSchema[datetime] = Field(None)
     end_date: SkipJsonSchema[datetime] = Field(None)
-    
+
     class Config:
         orm_mode = True
         from_attributes = True
+
 
 class GoalCheckpoints(BaseModel):
     id: SkipJsonSchema[int] = Field(None)
@@ -23,7 +24,7 @@ class GoalCheckpoints(BaseModel):
     description: str = Field(None)
     start_date: SkipJsonSchema[datetime] = Field(None)
     end_date: SkipJsonSchema[datetime] = Field(None)
-    
+
     class Config:
         orm_mode = True
         from_attributes = True
@@ -44,12 +45,12 @@ class GetAllFeedbackFilter(BaseModel):
 
 class GetFilteredFeedbackFilter(BaseModel):
     employee_id: int = -1
-    
+
     department_id: int = -1
     role_id: int = -1
 
     start_date: datetime = datetime(year=1970, month=1, day=1, hour=1)
     end_date: datetime = datetime.now()
-    
+
     skip: int = 0
     limit: int = 100

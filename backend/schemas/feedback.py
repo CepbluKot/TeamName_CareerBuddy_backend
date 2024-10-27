@@ -4,7 +4,7 @@ from sqlalchemy.orm import mapped_column
 
 
 class Feedback(db.Model):
-    __tablename__ = 'feedback'
+    __tablename__ = "feedback"
     id = db.Column(db.Integer, primary_key=True)
     from_employee_id = mapped_column(ForeignKey("employees.id"))
     to_employee_id = mapped_column(ForeignKey("employees.id"))
@@ -15,7 +15,7 @@ class Feedback(db.Model):
 
 
 class FeedbackTemplates(db.Model):
-    __tablename__ = 'feedback_templates'
+    __tablename__ = "feedback_templates"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
     content = db.Column(db.String)

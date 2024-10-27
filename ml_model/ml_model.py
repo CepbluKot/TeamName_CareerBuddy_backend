@@ -9,7 +9,7 @@ logging.basicConfig(
 
 
 def main():
-    logging.info(' sample text ')
+    logging.info(" sample text ")
 
 
 main()
