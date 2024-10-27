@@ -11,9 +11,8 @@ class EmployeesAuth(BaseModel):
     
     class Config:
         orm_mode = True
+        from_attributes = True
 
 
-class EmployeeAuthForm(EmployeesAuth):
-    name: str = Field("Jonh")
-    surname: str = Field("Doe")
-    email: str = Field("johndoe@mail.com")
+# class EmployeeAuthForm(EmployeesAuth):
+#     pass

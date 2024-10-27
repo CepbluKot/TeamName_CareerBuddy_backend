@@ -62,6 +62,7 @@ class Roles(BaseModel):
     
     class Config:
         orm_mode = True
+        from_attributes = True
 
 
 class Departments(BaseModel):
@@ -70,3 +71,4 @@ class Departments(BaseModel):
     
     class Config:
         orm_mode = True
+        from_attributes = True
