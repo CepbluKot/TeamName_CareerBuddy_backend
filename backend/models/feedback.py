@@ -26,3 +26,12 @@ class FeedbackList(RootModel[Any]):
 class GetAllFeedback(BaseModel):
     skip: int = 0
     limit: int = 100
+
+
+class GetFilteredFeedback(BaseModel):
+    to_employee_id: int = -1
+    from_employee_id: int = -1
+    department_id: int = -1
+    role_id: int = -1
+    skip: int = -1
+    limit: int = -1

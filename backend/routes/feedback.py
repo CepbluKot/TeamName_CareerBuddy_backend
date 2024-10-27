@@ -3,15 +3,7 @@ from pydantic import BaseModel
 from flask import Response, jsonify
 from flask_openapi3 import Info, Tag
 from flask_openapi3 import APIBlueprint, OpenAPI
-from models.employees import (
-    Employees as employees_model,
-    EmployeesResponseList,
-    GetEmployeeByIDParams,
-    GetAllEmployees,
-    EmployeesResponse,
-    Departments as departments_model,
-    Roles as roles_model,
-)
+from models.feedback import GetFilteredFeedback
 
 from models.feedback import Feedback as feedback_model, FeedbackList, GetAllFeedback
 
@@ -33,20 +25,75 @@ feedback_tag = Tag(name="feedback", description="employees api")
 
 
 @api.get(
+    "/filtered_feedback",
+    tags=[feedback_tag],
+    responses={HTTPStatus.OK: FeedbackList},
+)
+def get_filtered_feedback(query: GetFilteredFeedback):
+    all_feedback_query = select(feedback_schema)
+    
+    employee_alias_for_department_id = aliased(employees_schema)
+    employee_alias_for_role_id = aliased(employees_schema)
+
+
+    if query.to_employee_id and query.to_employee_id != -1:
+        all_feedback_query = all_feedback_query.filter(
+            feedback_schema.to_employee_id == query.to_employee_id
+        )
+
+    if query.from_employee_id and query.from_employee_id != -1:
+        all_feedback_query = all_feedback_query.filter(
+            feedback_schema.from_employee_id == query.from_employee_id
+        )
+
+
+    if query.department_id and query.department_id != -1:
+        all_feedback_query = all_feedback_query.join(
+            employee_alias_for_department_id, employee_alias_for_department_id.id == feedback_schema.to_employee_id
+        ).filter(employee_alias_for_department_id.department_id == query.department_id)
+
+    if query.role_id and query.role_id != -1:
+        all_feedback_query = all_feedback_query.join(
+            employee_alias_for_role_id, employee_alias_for_role_id.id == feedback_schema.to_employee_id
+        ).filter(employee_alias_for_role_id.role_id == query.role_id)
+
+
+    if query.limit and query.limit != -1:
+        all_feedback_query = all_feedback_query.limit(query.limit)
+
+    else:
+        all_feedback_query = all_feedback_query.limit(100)
+
+    if query.skip and query.skip != -1:
+        all_feedback_query = all_feedback_query.offset(query.skip)
+
+    all_feedback = db.session.execute(
+        all_feedback_query
+    ).scalars().all()
+
+    print('got filtered feedback ', all_feedback)
+
+    parsed_feedback = []
+
+    for feedback in all_feedback:
+        parsed = feedback_model.from_orm(feedback)
+        parsed_feedback.append(parsed.dict())
+
+    return parsed_feedback
+
+
+@api.get(
     "/all_feedback",
     tags=[feedback_tag],
     responses={HTTPStatus.OK: FeedbackList},
 )
-def get_all_employees(query: GetAllFeedback):
+def get_all_feedback(query: GetAllFeedback):
     all_feedback = (
         db.session.execute(
-            select(
-                feedback_schema
-            )
-            .limit(query.limit)
-            .offset(query.skip)
+            select(feedback_schema).limit(query.limit).offset(query.skip)
         )
-        .scalars().all()
+        .scalars()
+        .all()
     )
 
     parsed_feedback = []
@@ -54,39 +101,5 @@ def get_all_employees(query: GetAllFeedback):
     for feedback in all_feedback:
         parsed = feedback_model.from_orm(feedback)
         parsed_feedback.append(parsed.dict())
-    
+
     return parsed_feedback
-
-
-# @api.get(
-#     "/get_employee", tags=[feedback_tag], responses={HTTPStatus.OK: EmployeesResponse}
-# )
-# def get_employee(query: GetEmployeeByIDParams):
-#     employee_data = (
-#         db.session.execute(
-#             select(
-#                 employees_schema,
-#                 departments_schema.name.label("department_name"),
-#                 roles_schema.name.label("role_name"),
-#             )
-#             .join(
-#                 departments_schema,
-#                 employees_schema.department_id == departments_schema.id,
-#             )
-#             .join(roles_schema, employees_schema.role_id == roles_schema.id)
-#             .where(employees_schema.id == query.id)
-#         )
-#         .fetchone()
-#     )
-
-#     if not employee_data:
-#         return {
-#             "code": 1,
-#             "message": "employee with this id doesnt exist",
-#         }, HTTPStatus.BAD_REQUEST
-
-#     parsed = EmployeesResponse.from_orm(employee_data[0])
-#     parsed.department_name = employee_data[1]
-#     parsed.role_name = employee_data[2]
-
-#     return parsed.dict()
