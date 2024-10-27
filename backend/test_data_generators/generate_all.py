@@ -18,7 +18,7 @@ def generate_test_data():
         generate_employees()
 
         employees_ids = db.session.execute(select(Employees.id)).scalars().all()
-        
+
         for id in employees_ids:
             generate_goals(employee_id=id)
 

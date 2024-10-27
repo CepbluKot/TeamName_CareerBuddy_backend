@@ -10,9 +10,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-env_vars_general = {
-    "AIRFLOW_UID": os.getenv("AIRFLOW_UID")
-}
+env_vars_general = {"AIRFLOW_UID": os.getenv("AIRFLOW_UID")}
 
 default_args = {
     "owner": "airflow",
@@ -22,7 +20,7 @@ default_args = {
 
 CRON_SCHEDULE_CHANNEL_DATA_UPDATE = os.getenv("CRON_SCHEDULE_CHANNEL_DATA_UPDATE")
 if not CRON_SCHEDULE_CHANNEL_DATA_UPDATE:
-    CRON_SCHEDULE_CHANNEL_DATA_UPDATE = '1-59/20 * * * *'
+    CRON_SCHEDULE_CHANNEL_DATA_UPDATE = "1-59/20 * * * *"
 
 dag = DAG(
     dag_id="ml_model",
@@ -37,8 +35,7 @@ kafka_clusters_cmdb_test = DockerOperator(
     task_id="ml_model_task",
     image="ml_model:latest",
     command="python3 ./ml_model.py",
-
     docker_url="unix://var/run/docker.sock",
     network_mode="host",
-    environment=env_vars_general
+    environment=env_vars_general,
 )

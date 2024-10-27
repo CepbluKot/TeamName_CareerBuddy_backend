@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field
-from typing import List
+from typing import List, Any
 from pydantic.json_schema import SkipJsonSchema
+from pydantic import RootModel
 
 
 class Employees(BaseModel):
@@ -31,6 +32,25 @@ class Employees(BaseModel):
 
     class Config:
         orm_mode = True
+        from_attributes = True
+
+
+class EmployeesResponse(Employees):
+    role_name: str = ""
+    department_name: str = ""
+
+
+class EmployeesResponseList(RootModel[Any]):
+    root: List[EmployeesResponse]
+
+
+class GetAllEmployees(BaseModel):
+    skip: int = 0
+    limit: int = 100
+
+
+class GetEmployeeByIDParams(BaseModel):
+    id: int
 
 
 class Roles(BaseModel):
@@ -39,14 +59,31 @@ class Roles(BaseModel):
     admin_page: bool = Field(None)
     feedback_page: bool = Field(None)
     career_goal_page: bool = Field(None)
-    
+
     class Config:
         orm_mode = True
+        from_attributes = True
 
 
 class Departments(BaseModel):
     id: SkipJsonSchema[int] = Field(None)
     name: str = Field(None)
-    
+
     class Config:
         orm_mode = True
+        from_attributes = True
+
+
+class DepartmentsResponseList(RootModel[Any]):
+    root: List[Departments]
+
+
+class RolesResponseList(RootModel[Any]):
+    root: List[Roles]
+
+
+class GetFilteredEmployees(BaseModel):
+    department_id: int = -1
+    role_id: int = -1
+    skip: int = 0
+    limit: int = 100

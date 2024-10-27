@@ -5,11 +5,9 @@ from datadog import initialize, statsd
 STATSD_HOST = "statsd-exporter"
 STATSD_PORT = "9125"
 
+
 def setting_statsd():
-    statsd_options = {
-        "statsd_host": STATSD_HOST,
-        "statsd_port": STATSD_PORT
-    }
+    statsd_options = {"statsd_host": STATSD_HOST, "statsd_port": STATSD_PORT}
 
     initialize(**statsd_options)
 
@@ -20,15 +18,19 @@ class StatsdMiddleware:
         self.__app_name = app_name
 
         # send service info with tags
-        statsd.gauge("flask.info", 1, tags=[
-            f"app_name:{self.__app_name}",
-        ])
+        statsd.gauge(
+            "flask.info",
+            1,
+            tags=[
+                f"app_name:{self.__app_name}",
+            ],
+        )
 
     def __call__(self, environ, start_response):
         patch_info = {
-            "app_name": self.__app_name, 
-            "method": environ['REQUEST_METHOD'],
-            "endpoint": environ['PATH_INFO']
+            "app_name": self.__app_name,
+            "method": environ["REQUEST_METHOD"],
+            "endpoint": environ["PATH_INFO"],
         }
 
         def _start_response(status, headers, *args, **kwargs):
@@ -40,7 +42,7 @@ class StatsdMiddleware:
                     f"method:{kwargs.get('method', '')}",
                     f"endpoint:{kwargs.get('endpoint', '')}",
                     f"status:{status.split()[0]}",
-                ]
+                ],
             )
             return start_response(status, headers, *args)
 
@@ -52,6 +54,6 @@ class StatsdMiddleware:
                 f"method:{patch_info.get('method', '')}",
                 f"endpoint:{patch_info.get('endpoint', '')}",
             ],
-            use_ms=True
+            use_ms=True,
         ):
             return self.__application(environ, partial(_start_response, **patch_info))
