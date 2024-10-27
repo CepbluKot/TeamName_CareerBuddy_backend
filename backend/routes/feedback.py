@@ -30,12 +30,12 @@ from sqlalchemy import select
 from sqlalchemy.orm import aliased
 from typing import List
 
-from settings import db
+from settings import db, security
 from services.employees import get_filtered_employees as get_filtered_employees_func
 from datetime import datetime
 
 from decorators.auth import role_required
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 
 api = APIBlueprint("/feedback", __name__, url_prefix="/feedback", doc_ui=True)
@@ -45,11 +45,12 @@ feedback_tag = Tag(name="feedback", description="employees api")
 @api.get(
     "/filtered_feedback",
     tags=[feedback_tag],
-    responses={HTTPStatus.OK: FeedbackList},
+    responses={HTTPStatus.OK: FeedbackList}, 
+    security=security
 )
 @jwt_required()
 @role_required(["Human Resources"])
-def get_filtered_feedback(query: GetFilteredFeedback):
+async def get_filtered_feedback(query: GetFilteredFeedback):
     filtered_feedback_query = select(feedback_schema)
 
     employee_alias_for_department_id = aliased(employees_schema)
@@ -97,14 +98,58 @@ def get_filtered_feedback(query: GetFilteredFeedback):
     return parsed_feedback
 
 
+
+
+@api.get(
+    "/my_feedback",
+    tags=[feedback_tag],
+    responses={HTTPStatus.OK: FeedbackList}, 
+    security=security
+)
+@jwt_required()
+@role_required([])
+async def my_filtered_feedback(query: GetAllFeedback):
+    current_user = get_jwt_identity()
+    current_user_id = current_user.get("id")
+
+    filtered_feedback_query = select(feedback_schema)
+
+    employee_alias_for_department_id = aliased(employees_schema)
+    employee_alias_for_role_id = aliased(employees_schema)
+
+    filtered_feedback_query = filtered_feedback_query.filter(
+        feedback_schema.to_employee_id == current_user_id
+    )
+
+    if query.limit and query.limit != -1:
+        filtered_feedback_query = filtered_feedback_query.limit(query.limit)
+
+    else:
+        filtered_feedback_query = filtered_feedback_query.limit(100)
+
+    if query.skip and query.skip != -1:
+        filtered_feedback_query = filtered_feedback_query.offset(query.skip)
+
+    all_feedback = db.session.execute(filtered_feedback_query).scalars().all()
+
+    parsed_feedback = []
+
+    for feedback in all_feedback:
+        parsed = feedback_model.from_orm(feedback)
+        parsed_feedback.append(parsed.dict())
+
+    return parsed_feedback
+
+
 @api.get(
     "/all_feedback",
     tags=[feedback_tag],
-    responses={HTTPStatus.OK: FeedbackList},
+    responses={HTTPStatus.OK: FeedbackList}, 
+    security=security
 )
 @jwt_required()
 @role_required(["Human Resources"])
-def get_all_feedback(query: GetAllFeedback):
+async def get_all_feedback(query: GetAllFeedback):
     all_feedback = (
         db.session.execute(
             select(feedback_schema).limit(query.limit).offset(query.skip)
@@ -125,11 +170,12 @@ def get_all_feedback(query: GetAllFeedback):
 @api.get(
     "/all_feedback_templates",
     tags=[feedback_tag],
-    responses={HTTPStatus.OK: FeedbackTemplateList},
+    responses={HTTPStatus.OK: FeedbackTemplateList}, 
+    security=security
 )
 @jwt_required()
 @role_required(["Human Resources"])
-def get_all_feedback_templates(query: GetAllFeedback):
+async def get_all_feedback_templates(query: GetAllFeedback):
     all_feedback = (
         db.session.execute(
             select(feedback_template_schema).limit(query.limit).offset(query.skip)
@@ -150,11 +196,12 @@ def get_all_feedback_templates(query: GetAllFeedback):
 @api.get(
     "/get_employees_feedback_template",
     tags=[feedback_tag],
-    responses={HTTPStatus.OK: FeedbackTemplateList},
+    responses={HTTPStatus.OK: FeedbackTemplateList}, 
+    security=security
 )
 @jwt_required()
 @role_required(["Human Resources"])
-def get_users_feedback_template(query: GetUsersFeedbackTemplate):
+async def get_users_feedback_template(query: GetUsersFeedbackTemplate):
     all_feedback = (
         db.session.execute(
             select(feedback_template_schema)
@@ -175,10 +222,11 @@ def get_users_feedback_template(query: GetUsersFeedbackTemplate):
     return parsed_feedback_templates
 
 
-@api.post("/create_feedback_template", tags=[feedback_tag])
+@api.post("/create_feedback_template", tags=[feedback_tag], 
+    security=security)
 @jwt_required()
 @role_required(["Human Resources"])
-def create_feedback_template(body: feedback_template_model):
+async def create_feedback_template(body: feedback_template_model):
 
     new_feedback_template = feedback_template_schema(
         name=body.name, content=body.content, created_by_employee_id=123
@@ -196,11 +244,12 @@ def create_feedback_template(body: feedback_template_model):
 
 @api.post(
     "/create_feedback",
-    tags=[feedback_tag],
+    tags=[feedback_tag], 
+    security=security
 )
 @jwt_required()
 @role_required(["Human Resources"])
-def create_feedback(body: CreateFeedback):
+async def create_feedback(body: CreateFeedback):
     does_template_exists = db.session.execute(
         select(feedback_template_schema).where(
             feedback_template_schema.id == body.feedback_form_template_id
@@ -236,11 +285,12 @@ def create_feedback(body: CreateFeedback):
 
 @api.post(
     "/create_feedback_answer",
-    tags=[feedback_tag],
+    tags=[feedback_tag], 
+    security=security
 )
 @jwt_required()
 @role_required([])
-def create_feedback_answer(body: CreateFeedbackAnswer):
+async def create_feedback_answer(body: CreateFeedbackAnswer):
     feedback = db.session.execute(
         select(feedback_schema).where(feedback_schema.id == body.feedback_id)
     ).scalar()

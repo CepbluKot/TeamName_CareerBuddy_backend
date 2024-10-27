@@ -3,7 +3,7 @@ aniso8601==9.0.1
 attrs==23.1.0
 blinker==1.7.0
 click==8.1.7
-Flask==2.3.3
+flask[async]
 Flask-Cors==4.0.0
 Flask-Migrate==4.0.5
 flask-restx==1.2.0

@@ -39,7 +39,16 @@ def generate_employees():
         name = name_data[0]
         surname = name_data[1]
 
+        last_employee_num = db.session.execute(
+            select(employees_schema.employee_number).order_by(
+                employees_schema.employee_number.desc()
+            )
+        ).scalar()
+        if not last_employee_num:
+            last_employee_num = 0
+
         employee_db_record = employees_schema(
+            id=last_employee_num,
             name=name,
             surname=surname,
             email=f.email(),
@@ -72,6 +81,7 @@ def generate_employees():
             db.session.rollback()
             logging.error(f"error occupied during flushing employees: {e}")
 
+        db.session.refresh(employee_db_record)
         new_employee_id = employee_db_record.id
 
         employee_auth_db_schema = employees_auth_schema(

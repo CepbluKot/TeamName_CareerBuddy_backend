@@ -23,7 +23,7 @@ departments_tag = Tag(name="departments", description="departments api")
     tags=[departments_tag],
     responses={HTTPStatus.OK: DepartmentsResponseList},
 )
-def get_all_departments():
+async def get_all_departments():
     all_departments = db.session.execute(select(departments_schema)).scalars().all()
 
     parsed_departments = []

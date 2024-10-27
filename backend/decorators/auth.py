@@ -7,7 +7,7 @@ from http import HTTPStatus
 def role_required(allowed_roles: list=[]):
     def decorator(func):
         @wraps(func)
-        def wrapper(*args, **kwargs):
+        async def wrapper(*args, **kwargs):
             if not allowed_roles or allowed_roles == ["*"]:
                 employee_data = get_jwt_identity()
 
@@ -16,7 +16,7 @@ def role_required(allowed_roles: list=[]):
                         "msg": "you need to be authorized to access this method",
                     }, HTTPStatus.UNAUTHORIZED
 
-                return func(*args, **kwargs)
+                return await func(*args, **kwargs)
 
             employee_data = get_jwt_identity()
             employee_role = employee_data.get("role")
@@ -27,7 +27,7 @@ def role_required(allowed_roles: list=[]):
                     "msg": "role not allowed",
                 }, HTTPStatus.BAD_REQUEST
 
-            return func(*args, **kwargs)
+            return await func(*args, **kwargs)
 
         return wrapper
 

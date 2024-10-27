@@ -6,7 +6,7 @@ from sqlalchemy.dialects.postgresql import ARRAY
 
 class Employees(db.Model):
     __tablename__ = "employees"
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True, default=None)
     name = db.Column(db.String)
     surname = db.Column(db.String)
     email = db.Column(db.String)

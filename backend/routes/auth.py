@@ -23,6 +23,7 @@ from sqlalchemy import select
 from schemas.employees import Roles, Departments, Employees as employees_schema
 
 from flask_jwt_extended import create_access_token
+from decorators.auth import role_required
 
 
 api = APIBlueprint("/auth", __name__, url_prefix="/auth", doc_ui=True)
@@ -33,7 +34,11 @@ f = faker.Faker()
 @api.post(
     "/register",
 )
-def register(body: EmployeesAuthRegister):
+async def register(body: EmployeesAuthRegister):
+    if body.id == 0:
+        body.id = None
+
+
     is_login_exists = db.session.execute(
         select(employees_auth_schema.login).where(
             employees_auth_schema.login == body.login
@@ -94,6 +99,7 @@ def register(body: EmployeesAuthRegister):
     years_with_cur_manager = random.randint(1, years_in_current_role)
 
     employee_db_record = employees_schema(
+        id=None,
         name=f.name()[0],
         surname=f.name()[1],
         email=f.email(),
@@ -122,12 +128,16 @@ def register(body: EmployeesAuthRegister):
     db.session.add(employee_db_record)
 
     try:
-        db.session.flush()
+        db.session.commit()
     except Exception as e:
         db.session.rollback()
         logging.error(f"error occupied during registering employee: {e}")
 
+
+    db.session.refresh(employee_db_record)
     new_employee_id = employee_db_record.id
+
+    print('new employee id', new_employee_id)
 
     employee_auth_db_schema = employees_auth_schema(
         login=body.login,
@@ -150,16 +160,23 @@ def register(body: EmployeesAuthRegister):
 @api.post(
     "/login",
 )
-def login(body: EmployeesAuth):
-    id_in_db = db.session.execute(
-        select(employees_auth_schema.employee_id).where(
+async def login(body: EmployeesAuth):
+    login_in_db = db.session.execute(
+        select(employees_auth_schema.login).where(
             employees_auth_schema.login == body.login
         )
     ).scalar()
-    if not id_in_db:
+    if not login_in_db:
         return {
             "msg": "user with this login not registered",
         }, HTTPStatus.BAD_REQUEST
+
+    id_in_db = db.session.execute(
+        select(employees_auth_schema.employee_id).where(
+            employees_auth_schema.login == body.login
+        )).scalar()
+    
+    print('employee id', id_in_db)
 
     password_in_db = db.session.execute(
         select(employees_auth_schema.password)
@@ -183,7 +200,16 @@ def login(body: EmployeesAuth):
 
 @api.post("/refresh_token", security=security)
 @jwt_required()
-def refresh_token():
+async def refresh_token():
     identity = get_jwt_identity()
     access_token = create_access_token(identity=identity)
     return jsonify(access_token=access_token)
+
+
+@api.get("/me", security=security)
+@jwt_required()
+@role_required([])
+async def testing():
+    # try:
+    current_user = get_jwt_identity()
+    return { "msg": current_user}, HTTPStatus.OK

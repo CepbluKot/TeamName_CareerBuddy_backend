@@ -15,11 +15,11 @@ class EmployeesAuth(BaseModel):
 
 
 class EmployeesAuthRegister(BaseModel):
-    id: SkipJsonSchema[int] = Field(None)
+    id: SkipJsonSchema[int] = None
     login: str = Field(None)
     password: str = Field(None)
     is_active: SkipJsonSchema[bool] = Field(True)
-    role_id: int
+    role_id: int = 1
 
     class Config:
         orm_mode = True

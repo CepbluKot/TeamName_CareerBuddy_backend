@@ -23,7 +23,7 @@ roles_tag = Tag(name="roles", description="roles api")
     tags=[roles_tag],
     responses={HTTPStatus.OK: RolesResponseList},
 )
-def get_all_roles():
+async def get_all_roles():
     all_roles = db.session.execute(select(roles_schema)).scalars().all()
 
     parsed_roles = []

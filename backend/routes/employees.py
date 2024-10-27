@@ -22,11 +22,11 @@ from sqlalchemy import select
 from sqlalchemy.orm import aliased
 from typing import List
 
-from settings import db
+from settings import db, security
 from services.employees import get_filtered_employees as get_filtered_employees_func
 
 from decorators.auth import role_required
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 
 api = APIBlueprint("/employees", __name__, url_prefix="/employees", doc_ui=True)
@@ -36,11 +36,12 @@ employees_tag = Tag(name="employees", description="employees api")
 @api.get(
     "/all_employees",
     tags=[employees_tag],
-    responses={HTTPStatus.OK: EmployeesResponseList},
+    responses={HTTPStatus.OK: EmployeesResponseList}, 
+    security=security
 )
 @jwt_required()
 @role_required([])
-def get_all_employees(query: GetAllEmployees):
+async def get_all_employees(query: GetAllEmployees):
     # department_name_alias = aliased(Departments, name='user2')
 
     all_employees = db.session.execute(
@@ -71,11 +72,12 @@ def get_all_employees(query: GetAllEmployees):
 
 
 @api.get(
-    "/get_employee", tags=[employees_tag], responses={HTTPStatus.OK: EmployeesResponse}
+    "/get_employee", tags=[employees_tag], responses={HTTPStatus.OK: EmployeesResponse}, 
+    security=security
 )
 @jwt_required()
 @role_required([])
-def get_employee(query: GetEmployeeByIDParams):
+async def get_employee(query: GetEmployeeByIDParams):
     employee_data = db.session.execute(
         select(
             employees_schema,
@@ -105,11 +107,12 @@ def get_employee(query: GetEmployeeByIDParams):
 @api.get(
     "/filtered_employees",
     tags=[employees_tag],
-    responses={HTTPStatus.OK: EmployeesResponseList},
+    responses={HTTPStatus.OK: EmployeesResponseList}, 
+    security=security
 )
 @jwt_required()
 @role_required([])
-def get_filtered_employees(query: GetFilteredEmployees):
+async def get_filtered_employees(query: GetFilteredEmployees):
 
     parsed_employees = get_filtered_employees_func(
         department_id=query.department_id,
@@ -118,3 +121,42 @@ def get_filtered_employees(query: GetFilteredEmployees):
         limit=query.limit,
     )
     return parsed_employees
+
+
+
+@api.get(
+    "/my_data",
+    tags=[employees_tag],
+    responses={HTTPStatus.OK: EmployeesResponseList}, 
+    security=security
+)
+@jwt_required()
+@role_required([])
+async def get_my_profile(query: GetFilteredEmployees):
+    current_user = get_jwt_identity()
+    current_user_id = current_user.get("id")
+
+    employee_data = db.session.execute(
+        select(
+            employees_schema,
+            departments_schema.name.label("department_name"),
+            roles_schema.name.label("role_name"),
+        )
+        .join(
+            departments_schema,
+            employees_schema.department_id == departments_schema.id,
+        )
+        .join(roles_schema, employees_schema.role_id == roles_schema.id)
+        .where(employees_schema.id == current_user_id)
+    ).fetchone()
+
+    if not employee_data:
+        return {
+            "msg": "employee with this id doesnt exist",
+        }, HTTPStatus.BAD_REQUEST
+
+    parsed = EmployeesResponse.from_orm(employee_data[0])
+    parsed.department_name = employee_data[1]
+    parsed.role_name = employee_data[2]
+
+    return parsed.dict()
