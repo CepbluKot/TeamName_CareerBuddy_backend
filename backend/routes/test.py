@@ -32,7 +32,7 @@ employees_tag = Tag(name="test", description="test api")
 
 @api.get("/test", security=security)
 @jwt_required()
-# @role_required(['Manager'])
+@role_required(["Human Resources"])
 def testing():
     # try:
     current_user = get_jwt_identity()

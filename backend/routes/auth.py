@@ -172,20 +172,14 @@ def login(body: EmployeesAuth):
     if not password_in_db:
         return {"code": 1, "message": "wrong password"}, HTTPStatus.BAD_REQUEST
 
-
     employee_data = db.session.execute(
-        select(employees_schema, Roles.name).where(
-            employees_auth_schema.login == body.login
-        )
+        select(employees_schema, Roles.name)
+        .where(employees_auth_schema.login == body.login)
         .join(Roles, employees_schema.role_id == Roles.id)
     ).fetchone()
-    empl_data = employees_model.from_orm(employee_data[0])
-    print('got employee data', empl_data, employee_data[1])
     identity = {"id": id_in_db, "role": employee_data[1]}
 
-    access_token = create_access_token(
-        identity=identity, expires_delta=token_live_time
-    )
+    access_token = create_access_token(identity=identity, expires_delta=token_live_time)
     return jsonify(access_token=access_token)
 
 

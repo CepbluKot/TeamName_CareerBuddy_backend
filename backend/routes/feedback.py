@@ -6,9 +6,21 @@ from flask_openapi3 import Info, Tag
 from flask_openapi3 import APIBlueprint, OpenAPI
 from models.feedback import GetFilteredFeedback
 
-from models.feedback import Feedback as feedback_model, FeedbackList, GetAllFeedback, CreateFeedback, CreateFeedbackAnswer, FeedbackTemplateList, FeedbackTemplate as feedback_template_model, GetUsersFeedbackTemplate
+from models.feedback import (
+    Feedback as feedback_model,
+    FeedbackList,
+    GetAllFeedback,
+    CreateFeedback,
+    CreateFeedbackAnswer,
+    FeedbackTemplateList,
+    FeedbackTemplate as feedback_template_model,
+    GetUsersFeedbackTemplate,
+)
 
-from schemas.feedback import Feedback as feedback_schema, FeedbackTemplates as feedback_template_schema
+from schemas.feedback import (
+    Feedback as feedback_schema,
+    FeedbackTemplates as feedback_template_schema,
+)
 from schemas.employees import (
     Employees as employees_schema,
     Departments as departments_schema,
@@ -136,7 +148,10 @@ def get_all_feedback_templates(query: GetAllFeedback):
 def get_users_feedback_template(query: GetUsersFeedbackTemplate):
     all_feedback = (
         db.session.execute(
-            select(feedback_template_schema).limit(query.limit).offset(query.skip).where(feedback_template_schema.created_by_employee_id == 1)
+            select(feedback_template_schema)
+            .limit(query.limit)
+            .offset(query.skip)
+            .where(feedback_template_schema.created_by_employee_id == 1)
         )
         .scalars()
         .all()
@@ -151,14 +166,12 @@ def get_users_feedback_template(query: GetUsersFeedbackTemplate):
     return parsed_feedback_templates
 
 
-@api.post(
-    "/create_feedback_template",
-    tags=[feedback_tag]
-)
+@api.post("/create_feedback_template", tags=[feedback_tag])
 def create_feedback_template(body: feedback_template_model):
 
-
-    new_feedback_template = feedback_template_schema(name=body.name, content=body.content, created_by_employee_id=123)
+    new_feedback_template = feedback_template_schema(
+        name=body.name, content=body.content, created_by_employee_id=123
+    )
     db.session.add(new_feedback_template)
 
     try:
@@ -175,21 +188,29 @@ def create_feedback_template(body: feedback_template_model):
     tags=[feedback_tag],
 )
 def create_feedback(body: CreateFeedback):
-    does_template_exists = (
-        db.session.execute(
-            select(feedback_template_schema).where(feedback_template_schema.id == body.feedback_form_template_id)
+    does_template_exists = db.session.execute(
+        select(feedback_template_schema).where(
+            feedback_template_schema.id == body.feedback_form_template_id
         )
-        .scalar()
-    )
+    ).scalar()
 
     if not does_template_exists:
-        return {"code": 1, "message": "feedback template doesnt exist"}, HTTPStatus.BAD_REQUEST
+        return {
+            "code": 1,
+            "message": "feedback template doesnt exist",
+        }, HTTPStatus.BAD_REQUEST
 
-    filtered_employees = get_filtered_employees_func(department_id=body.department_id, role_id=body.role_id)
-    
+    filtered_employees = get_filtered_employees_func(
+        department_id=body.department_id, role_id=body.role_id
+    )
 
     for employee in filtered_employees:
-        new_feedback = feedback_schema(from_employee_id=1, to_employee_id=employee.id,date_sent=datetime.now(), template_id=body.feedback_form_template_id)
+        new_feedback = feedback_schema(
+            from_employee_id=1,
+            to_employee_id=employee.id,
+            date_sent=datetime.now(),
+            template_id=body.feedback_form_template_id,
+        )
         db.session.add(new_feedback)
 
     try:
@@ -201,18 +222,14 @@ def create_feedback(body: CreateFeedback):
     return {"code": 0, "message": "ok"}, HTTPStatus.OK
 
 
-
 @api.post(
     "/create_feedback_answer",
     tags=[feedback_tag],
 )
 def create_feedback_answer(body: CreateFeedbackAnswer):
-    feedback = (
-        db.session.execute(
-            select(feedback_schema).where(feedback_schema.id == body.feedback_id)
-        )
-        .scalar()
-    )
+    feedback = db.session.execute(
+        select(feedback_schema).where(feedback_schema.id == body.feedback_id)
+    ).scalar()
 
     if not feedback:
         return {"code": 1, "message": "feedback doesnt exist"}, HTTPStatus.BAD_REQUEST
@@ -228,4 +245,3 @@ def create_feedback_answer(body: CreateFeedbackAnswer):
         logging.error("error occupied during creation of feedback answer")
 
     return {"code": 0, "message": "ok"}, HTTPStatus.OK
-

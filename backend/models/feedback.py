@@ -25,7 +25,6 @@ class FeedbackTemplate(BaseModel):
     name: str = Field(None)
     content: str = Field(None)
 
-
     class Config:
         orm_mode = True
         from_attributes = True
@@ -48,6 +47,7 @@ class GetUsersFeedbackTemplate(BaseModel):
     id: int = 0
     skip: int = 0
     limit: int = 100
+
 
 class GetFilteredFeedback(BaseModel):
     to_employee_id: int = -1

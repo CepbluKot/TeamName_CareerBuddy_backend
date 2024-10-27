@@ -32,6 +32,7 @@ def generate_employees():
             .scalars()
             .first()
         )
+
         row = row.to_dict()
 
         name_data = f.name().split(" ")
