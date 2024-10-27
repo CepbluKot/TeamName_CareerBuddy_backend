@@ -7,7 +7,7 @@ from pydantic import BaseModel
 from flask import Response, jsonify
 from flask_openapi3 import Info, Tag
 from flask_openapi3 import APIBlueprint, OpenAPI
-from models.employees_auth import EmployeesAuth
+from models.employees_auth import EmployeesAuth, EmployeesAuthRegister
 from models.employees import Employees as employees_model
 from schemas.employees_auth import EmployeesAuth as employees_auth_schema
 
@@ -21,6 +21,7 @@ from flask_jwt_extended import (
 from settings import db, token_live_time, security
 from sqlalchemy import select
 from schemas.employees import Roles, Departments, Employees as employees_schema
+
 from flask_jwt_extended import create_access_token
 
 
@@ -32,7 +33,7 @@ f = faker.Faker()
 @api.post(
     "/register",
 )
-def register(body: EmployeesAuth):
+def register(body: EmployeesAuthRegister):
     is_login_exists = db.session.execute(
         select(employees_auth_schema.login).where(
             employees_auth_schema.login == body.login
@@ -44,7 +45,7 @@ def register(body: EmployeesAuth):
             "message": "user with this login already registered",
         }, HTTPStatus.BAD_REQUEST
 
-    role_ids = list(db.session.execute(select(Roles.id)).scalars())
+    # role_ids = list(db.session.execute(select(Roles.id)).scalars())
     department_ids = list(db.session.execute(select(Departments.id)).scalars())
     business_travels = list(
         db.session.execute(select(employees_schema.business_travel).distinct())
@@ -62,8 +63,8 @@ def register(body: EmployeesAuth):
         .all()
     )
 
-    if not role_ids:
-        role_ids = [1]
+    # if not role_ids:
+    #     role_ids = [1]
 
     if not department_ids:
         department_ids = [1]
@@ -98,7 +99,7 @@ def register(body: EmployeesAuth):
         surname=f.name()[1],
         email=f.email(),
         department_id=random.choice(department_ids),
-        role_id=random.choice(role_ids),
+        role_id=body.role_id,
         experience=experience,
         age=age,
         business_travel=random.choice(business_travels),
@@ -151,12 +152,12 @@ def register(body: EmployeesAuth):
     "/login",
 )
 def login(body: EmployeesAuth):
-    login_in_db = db.session.execute(
-        select(employees_auth_schema.login).where(
+    id_in_db = db.session.execute(
+        select(employees_auth_schema.employee_id).where(
             employees_auth_schema.login == body.login
         )
     ).scalar()
-    if not login_in_db:
+    if not id_in_db:
         return {
             "code": 1,
             "message": "user with this login not registered",
@@ -171,8 +172,19 @@ def login(body: EmployeesAuth):
     if not password_in_db:
         return {"code": 1, "message": "wrong password"}, HTTPStatus.BAD_REQUEST
 
+
+    employee_data = db.session.execute(
+        select(employees_schema, Roles.name).where(
+            employees_auth_schema.login == body.login
+        )
+        .join(Roles, employees_schema.role_id == Roles.id)
+    ).fetchone()
+    empl_data = employees_model.from_orm(employee_data[0])
+    print('got employee data', empl_data, employee_data[1])
+    identity = {"id": id_in_db, "role": employee_data[1]}
+
     access_token = create_access_token(
-        identity=login_in_db, expires_delta=token_live_time
+        identity=identity, expires_delta=token_live_time
     )
     return jsonify(access_token=access_token)
 

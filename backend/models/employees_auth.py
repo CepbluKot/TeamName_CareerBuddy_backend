@@ -14,5 +14,18 @@ class EmployeesAuth(BaseModel):
         from_attributes = True
 
 
+class EmployeesAuthRegister(BaseModel):
+    id: SkipJsonSchema[int] = Field(None)
+    login: str = Field(None)
+    password: str = Field(None)
+    is_active: SkipJsonSchema[bool] = Field(True)
+    role_id: int
+    
+    class Config:
+        orm_mode = True
+        from_attributes = True
+
+
+
 # class EmployeeAuthForm(EmployeesAuth):
 #     pass

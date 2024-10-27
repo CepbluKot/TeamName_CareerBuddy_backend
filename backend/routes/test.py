@@ -8,8 +8,10 @@ from flask_openapi3 import Info, Tag
 from flask_openapi3 import APIBlueprint, OpenAPI
 from models.employees import Employees as employee_model
 from schemas.employees import Employees as employees_schema
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from settings import db, security
+
+from decorators.auth import role_required
 
 from sqlalchemy import select
 from schemas.employees import Roles
@@ -30,10 +32,11 @@ employees_tag = Tag(name="test", description="test api")
 
 @api.get("/test", security=security)
 @jwt_required()
+# @role_required(['Manager'])
 def testing():
     # try:
-
-    return {"code": 0, "message": "ok"}, HTTPStatus.OK
+    current_user = get_jwt_identity()
+    return {"code": 0, "message": current_user}, HTTPStatus.OK
 
     # except Exception as e:
     #     return {"code": 1, "message": "not_ok", "err": str(e)}, HTTPStatus.BAD_REQUEST

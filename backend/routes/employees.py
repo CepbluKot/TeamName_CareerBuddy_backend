@@ -23,6 +23,7 @@ from sqlalchemy.orm import aliased
 from typing import List
 
 from settings import db
+from services.employees import get_filtered_employees as get_filtered_employees_func
 
 
 api = APIBlueprint("/employees", __name__, url_prefix="/employees", doc_ui=True)
@@ -102,47 +103,10 @@ def get_employee(query: GetEmployeeByIDParams):
 )
 def get_filtered_employees(query: GetFilteredEmployees):
 
-    filtered_employees_query = (
-        select(
-            employees_schema,
-            departments_schema.name.label("department_name"),
-            roles_schema.name.label("role_name"),
-        )
-        .join(
-            departments_schema,
-            employees_schema.department_id == departments_schema.id,
-        )
-        .join(roles_schema, employees_schema.role_id == roles_schema.id)
+    parsed_employees = get_filtered_employees_func(
+        department_id=query.department_id,
+        role_id=query.role_id,
+        skip=query.skip,
+        limit=query.limit,
     )
-
-    if query.department_id and query.department_id != -1:
-        filtered_employees_query = filtered_employees_query.filter(
-            employees_schema.department_id == query.department_id
-        )
-
-    if query.role_id and query.role_id != -1:
-        filtered_employees_query = filtered_employees_query.filter(
-            employees_schema.role_id == query.role_id
-        )
-
-    if query.limit and query.limit != -1:
-        filtered_employees_query = filtered_employees_query.limit(query.limit)
-
-    else:
-        filtered_employees_query = filtered_employees_query.limit(100)
-
-    if query.skip and query.skip != -1:
-        filtered_employees_query = filtered_employees_query.offset(query.skip)
-
-    all_employees = db.session.execute(filtered_employees_query).fetchall()
-
-    parsed_employees = []
-
-    for employee, department_name, role_name in all_employees:
-        parsed = EmployeesResponse.from_orm(employee)
-        parsed.role_name = role_name
-        parsed.department_name = department_name
-
-        parsed_employees.append(parsed.dict())
-
     return parsed_employees

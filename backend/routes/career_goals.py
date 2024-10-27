@@ -152,11 +152,12 @@ def get_filtered_career_goals(query: GetFilteredFeedbackFilter):
 
 @api.post("/create_career_goal", tags=[career_goals_tag])
 def create_career_goal(body: career_goals_model):
-    does_employee_exists = db.session.execute(select(employees_schema).filter(employees_schema.id == body.employee_id)).scalar()
+    does_employee_exists = db.session.execute(
+        select(employees_schema).filter(employees_schema.id == body.employee_id)
+    ).scalar()
     if not does_employee_exists:
-        return {"code": 1, "message": "employee doesnt exist"}, HTTPStatus.OK
+        return {"code": 1, "message": "employee doesnt exist"}, HTTPStatus.BAD_REQUEST
 
-    
     career_goal_db_record = career_goals_schema(
         employee_id=body.employee_id,
         name=body.name,
@@ -176,13 +177,18 @@ def create_career_goal(body: career_goals_model):
     return {"code": 0, "message": "ok"}, HTTPStatus.OK
 
 
-
 @api.post("/create_goal_checkpoint", tags=[career_goals_tag])
 def create_goal_checkpoint(body: goal_checkpoint_model):
-    does_career_goal_exists = db.session.execute(select(career_goals_schema).filter(career_goals_schema.id == body.career_goal_id)).scalar()
+    does_career_goal_exists = db.session.execute(
+        select(career_goals_schema).filter(
+            career_goals_schema.id == body.career_goal_id
+        )
+    ).scalar()
     if not does_career_goal_exists:
-        return {"code": 1, "message": "career goals doesnt exist"}, HTTPStatus.OK
-
+        return {
+            "code": 1,
+            "message": "career goals doesnt exist",
+        }, HTTPStatus.BAD_REQUEST
 
     goal_checkpoint_db_record = goal_checkpoint_schema(
         career_goal_id=body.career_goal_id,

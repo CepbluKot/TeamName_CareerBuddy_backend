@@ -33,37 +33,3 @@ def get_all_roles():
         parsed_roles.append(parsed.dict())
 
     return parsed_roles
-
-
-# @api.get(
-#     "/get_employee", tags=[feedback_tag], responses={HTTPStatus.OK: EmployeesResponse}
-# )
-# def get_employee(query: GetEmployeeByIDParams):
-#     employee_data = (
-#         db.session.execute(
-#             select(
-#                 employees_schema,
-#                 departments_schema.name.label("department_name"),
-#                 roles_schema.name.label("role_name"),
-#             )
-#             .join(
-#                 departments_schema,
-#                 employees_schema.department_id == departments_schema.id,
-#             )
-#             .join(roles_schema, employees_schema.role_id == roles_schema.id)
-#             .where(employees_schema.id == query.id)
-#         )
-#         .fetchone()
-#     )
-
-#     if not employee_data:
-#         return {
-#             "code": 1,
-#             "message": "employee with this id doesnt exist",
-#         }, HTTPStatus.BAD_REQUEST
-
-#     parsed = EmployeesResponse.from_orm(employee_data[0])
-#     parsed.department_name = employee_data[1]
-#     parsed.role_name = employee_data[2]
-
-#     return parsed.dict()
