@@ -15,6 +15,7 @@ from test_data_generators.generate_all import generate_test_data
 from schemas.career_goals import CareerGoals, GoalCheckpoints
 from schemas.feedback import Feedback, FeedbackTemplates
 from schemas.employees_auth import EmployeesAuth
+from schemas.employees import Employees, Roles, Departments
 
 
 migrate = Migrate(app, db)
@@ -32,6 +33,10 @@ admin.add_view(ModelView(GoalCheckpoints, db.session))
 admin.add_view(ModelView(Feedback, db.session))
 admin.add_view(ModelView(FeedbackTemplates, db.session))
 admin.add_view(ModelView(EmployeesAuth, db.session))
+admin.add_view(ModelView(Employees, db.session))
+admin.add_view(ModelView(EmployeesAuth, db.session))
+admin.add_view(ModelView(Roles, db.session))
+admin.add_view(ModelView(Departments, db.session))
 
 
 if __name__ == "__main__":

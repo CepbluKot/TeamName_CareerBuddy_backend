@@ -11,7 +11,7 @@ from models.employees import (
     EmployeesResponse,
     Departments as departments_model,
     Roles as roles_model,
-    GetFilteredEmployees
+    GetFilteredEmployees,
 )
 from schemas.employees import (
     Employees as employees_schema,
@@ -95,15 +95,12 @@ def get_employee(query: GetEmployeeByIDParams):
     return parsed.dict()
 
 
-
 @api.get(
     "/filtered_employees",
     tags=[employees_tag],
     responses={HTTPStatus.OK: EmployeesResponseList},
 )
 def get_filtered_employees(query: GetFilteredEmployees):
-    # department_name_alias = aliased(Departments, name='user2')
-
 
     filtered_employees_query = (
         select(
@@ -118,14 +115,15 @@ def get_filtered_employees(query: GetFilteredEmployees):
         .join(roles_schema, employees_schema.role_id == roles_schema.id)
     )
 
-
     if query.department_id and query.department_id != -1:
-        filtered_employees_query = filtered_employees_query.filter(employees_schema.department_id == query.department_id)
+        filtered_employees_query = filtered_employees_query.filter(
+            employees_schema.department_id == query.department_id
+        )
 
     if query.role_id and query.role_id != -1:
-        filtered_employees_query = filtered_employees_query.filter(employees_schema.role_id == query.role_id)
-
-
+        filtered_employees_query = filtered_employees_query.filter(
+            employees_schema.role_id == query.role_id
+        )
 
     if query.limit and query.limit != -1:
         filtered_employees_query = filtered_employees_query.limit(query.limit)
@@ -136,10 +134,7 @@ def get_filtered_employees(query: GetFilteredEmployees):
     if query.skip and query.skip != -1:
         filtered_employees_query = filtered_employees_query.offset(query.skip)
 
-
-    all_employees = db.session.execute(
-        filtered_employees_query        
-    ).fetchall()
+    all_employees = db.session.execute(filtered_employees_query).fetchall()
 
     parsed_employees = []
 
