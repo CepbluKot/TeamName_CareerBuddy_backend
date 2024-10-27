@@ -35,6 +35,7 @@ from services.employees import get_filtered_employees as get_filtered_employees_
 from datetime import datetime
 
 from decorators.auth import role_required
+from flask_jwt_extended import jwt_required
 
 
 api = APIBlueprint("/feedback", __name__, url_prefix="/feedback", doc_ui=True)
@@ -46,6 +47,7 @@ feedback_tag = Tag(name="feedback", description="employees api")
     tags=[feedback_tag],
     responses={HTTPStatus.OK: FeedbackList},
 )
+@jwt_required()
 @role_required(["Human Resources"])
 def get_filtered_feedback(query: GetFilteredFeedback):
     filtered_feedback_query = select(feedback_schema)
@@ -100,6 +102,7 @@ def get_filtered_feedback(query: GetFilteredFeedback):
     tags=[feedback_tag],
     responses={HTTPStatus.OK: FeedbackList},
 )
+@jwt_required()
 @role_required(["Human Resources"])
 def get_all_feedback(query: GetAllFeedback):
     all_feedback = (
@@ -124,6 +127,7 @@ def get_all_feedback(query: GetAllFeedback):
     tags=[feedback_tag],
     responses={HTTPStatus.OK: FeedbackTemplateList},
 )
+@jwt_required()
 @role_required(["Human Resources"])
 def get_all_feedback_templates(query: GetAllFeedback):
     all_feedback = (
@@ -148,6 +152,7 @@ def get_all_feedback_templates(query: GetAllFeedback):
     tags=[feedback_tag],
     responses={HTTPStatus.OK: FeedbackTemplateList},
 )
+@jwt_required()
 @role_required(["Human Resources"])
 def get_users_feedback_template(query: GetUsersFeedbackTemplate):
     all_feedback = (
@@ -171,6 +176,7 @@ def get_users_feedback_template(query: GetUsersFeedbackTemplate):
 
 
 @api.post("/create_feedback_template", tags=[feedback_tag])
+@jwt_required()
 @role_required(["Human Resources"])
 def create_feedback_template(body: feedback_template_model):
 
@@ -192,6 +198,7 @@ def create_feedback_template(body: feedback_template_model):
     "/create_feedback",
     tags=[feedback_tag],
 )
+@jwt_required()
 @role_required(["Human Resources"])
 def create_feedback(body: CreateFeedback):
     does_template_exists = db.session.execute(
@@ -231,6 +238,7 @@ def create_feedback(body: CreateFeedback):
     "/create_feedback_answer",
     tags=[feedback_tag],
 )
+@jwt_required()
 @role_required([])
 def create_feedback_answer(body: CreateFeedbackAnswer):
     feedback = db.session.execute(

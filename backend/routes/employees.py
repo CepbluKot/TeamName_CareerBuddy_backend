@@ -26,6 +26,7 @@ from settings import db
 from services.employees import get_filtered_employees as get_filtered_employees_func
 
 from decorators.auth import role_required
+from flask_jwt_extended import jwt_required
 
 
 api = APIBlueprint("/employees", __name__, url_prefix="/employees", doc_ui=True)
@@ -37,6 +38,7 @@ employees_tag = Tag(name="employees", description="employees api")
     tags=[employees_tag],
     responses={HTTPStatus.OK: EmployeesResponseList},
 )
+@jwt_required()
 @role_required([])
 def get_all_employees(query: GetAllEmployees):
     # department_name_alias = aliased(Departments, name='user2')
@@ -71,6 +73,7 @@ def get_all_employees(query: GetAllEmployees):
 @api.get(
     "/get_employee", tags=[employees_tag], responses={HTTPStatus.OK: EmployeesResponse}
 )
+@jwt_required()
 @role_required([])
 def get_employee(query: GetEmployeeByIDParams):
     employee_data = db.session.execute(
@@ -104,6 +107,7 @@ def get_employee(query: GetEmployeeByIDParams):
     tags=[employees_tag],
     responses={HTTPStatus.OK: EmployeesResponseList},
 )
+@jwt_required()
 @role_required([])
 def get_filtered_employees(query: GetFilteredEmployees):
 

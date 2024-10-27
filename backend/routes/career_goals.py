@@ -25,6 +25,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import aliased
 from typing import List
 
+from flask_jwt_extended import jwt_required
 from settings import db
 from decorators.auth import role_required
 
@@ -38,6 +39,7 @@ career_goals_tag = Tag(name="career_goals", description="career goals api")
     tags=[career_goals_tag],
     responses={HTTPStatus.OK: CareerGoalsWithGoalCheckpointsList},
 )
+@jwt_required()
 @role_required([])
 def get_all_career_goals(query: GetAllFeedbackFilter):
     all_career_goals = (
@@ -85,6 +87,7 @@ def get_all_career_goals(query: GetAllFeedbackFilter):
     tags=[career_goals_tag],
     responses={HTTPStatus.OK: CareerGoalsWithGoalCheckpointsList},
 )
+@jwt_required()
 @role_required([])
 def get_filtered_career_goals(query: GetFilteredFeedbackFilter):
     employee_alias_for_department_id = aliased(employees_schema)
@@ -153,6 +156,7 @@ def get_filtered_career_goals(query: GetFilteredFeedbackFilter):
 
 
 @api.post("/create_career_goal", tags=[career_goals_tag])
+@jwt_required()
 @role_required([])
 def create_career_goal(body: career_goals_model):
     does_employee_exists = db.session.execute(
@@ -181,6 +185,7 @@ def create_career_goal(body: career_goals_model):
 
 
 @api.post("/create_goal_checkpoint", tags=[career_goals_tag])
+@jwt_required()
 @role_required([])
 def create_goal_checkpoint(body: goal_checkpoint_model):
     does_career_goal_exists = db.session.execute(

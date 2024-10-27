@@ -42,7 +42,7 @@ app.wsgi_app = StatsdMiddleware(app.wsgi_app, "flask-monitoring")
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 db = SQLAlchemy(app)
 jwt = JWTManager(app)
-token_live_time = datetime.timedelta(minutes=1)
+token_live_time = datetime.timedelta(hours=3)
 
 engine = create_engine(
     "postgresql+psycopg2://postgres:admin@postgres-backend:5432/project"
