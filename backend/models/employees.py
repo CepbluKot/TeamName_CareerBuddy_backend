@@ -80,3 +80,10 @@ class DepartmentsResponseList(RootModel[Any]):
 
 class RolesResponseList(RootModel[Any]):
     root: List[Roles]
+
+
+class GetFilteredEmployees(BaseModel):
+    department_id: int = -1
+    role_id: int = -1
+    skip: int = 0
+    limit: int = 100
