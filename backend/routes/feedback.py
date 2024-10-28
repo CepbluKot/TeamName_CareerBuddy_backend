@@ -26,7 +26,7 @@ from schemas.employees import (
     Departments as departments_schema,
     Roles as roles_schema,
 )
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.orm import aliased
 from typing import List
 
@@ -308,22 +308,17 @@ async def create_feedback_answer(body: CreateFeedbackAnswer):
     current_user = get_jwt_identity()
     current_user_id = current_user.get("id")
 
-    feedback = db.session.execute(
-        select(feedback_schema).where(feedback_schema.id == body.feedback_id)
-    ).scalar()
 
-    if not feedback:
-        return {"msg": "feedback doesnt exist"}, HTTPStatus.BAD_REQUEST
+    db.session.execute(
+        update(feedback_schema).where(feedback_schema.id == body.feedback_id).values(answer_content=body.answer_content, date_answered=datetime.now())
+    )
+    db.session.commit()
 
-    feedback_answer = feedback_model.from_orm(feedback)
-    feedback_answer.answer_content = body.answer_content
-    db.session.add(feedback_answer)
-
-    try:
-        db.session.commit()
-    except Exception:
-        db.session.rollback()
-        logging.error("error occupied during creation of feedback answer")
-        return {"msg": "error"}, HTTPStatus.BAD_REQUEST
+    # try:
+    #     db.session.commit()
+    # except Exception:
+    #     db.session.rollback()
+    #     logging.error("error occupied during creation of feedback answer")
+    #     return {"msg": "error"}, HTTPStatus.BAD_REQUEST
 
     return { "msg": "ok"}, HTTPStatus.OK
