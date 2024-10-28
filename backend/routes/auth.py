@@ -82,13 +82,13 @@ async def register(body: EmployeesAuthRegister):
     if not education_fields:
         education_fields = ["Other"]
 
-    last_employee_num = db.session.execute(
-        select(employees_schema.employee_number).order_by(
-            employees_schema.employee_number.desc()
-        )
-    ).scalar()
-    if not last_employee_num:
-        last_employee_num = 1
+    # last_employee_num = db.session.execute(
+    #     select(employees_schema.employee_number).order_by(
+    #         employees_schema.employee_number.desc()
+    #     )
+    # ).scalar()
+    # if not last_employee_num:
+    #     last_employee_num = 1
 
     age = random.randint(20, 100)
     total_working_years = random.randint(5, age)
@@ -99,7 +99,7 @@ async def register(body: EmployeesAuthRegister):
     years_with_cur_manager = random.randint(1, years_in_current_role)
 
     employee_db_record = employees_schema(
-        id=last_employee_num,
+        # id=last_employee_num,
         name=f.name()[0],
         surname=f.name()[1],
         email=f.email(),
@@ -122,7 +122,6 @@ async def register(body: EmployeesAuthRegister):
         years_in_current_role=years_in_current_role,
         years_since_last_promotion=years_since_last_promotion,
         years_with_cur_manager=years_with_cur_manager,
-        employee_number=last_employee_num + 1,
     )
 
     db.session.add(employee_db_record)
@@ -132,7 +131,7 @@ async def register(body: EmployeesAuthRegister):
     except Exception as e:
         db.session.rollback()
         logging.error(f"error occupied during registering employee: {e}")
-
+        return {"msg": "error"}, HTTPStatus.BAD_REQUEST
 
     db.session.refresh(employee_db_record)
     new_employee_id = employee_db_record.id
@@ -153,7 +152,8 @@ async def register(body: EmployeesAuthRegister):
     except Exception as e:
         db.session.rollback()
         logging.error(f"error occupied during registering employee: {e}")
-
+        return {"msg": "error"}, HTTPStatus.BAD_REQUEST
+    
     return {"msg": "ok"}, HTTPStatus.OK
 
 

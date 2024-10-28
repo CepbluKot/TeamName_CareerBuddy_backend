@@ -227,9 +227,11 @@ async def get_users_feedback_template(query: GetUsersFeedbackTemplate):
 @jwt_required()
 @role_required(["Human Resources"])
 async def create_feedback_template(body: feedback_template_model):
+    current_user = get_jwt_identity()
+    current_user_id = current_user.get("id")
 
     new_feedback_template = feedback_template_schema(
-        name=body.name, content=body.content, created_by_employee_id=123
+        name=body.name, content=body.content, created_by_employee_id=current_user_id
     )
     db.session.add(new_feedback_template)
 
@@ -238,7 +240,9 @@ async def create_feedback_template(body: feedback_template_model):
     except Exception:
         db.session.rollback()
         logging.error("error occupied during creation of new feedback template")
-
+        return {"msg": "error"}, HTTPStatus.BAD_REQUEST
+        return {"msg": "error"}, HTTPStatus.BAD_REQUEST
+    
     return {"msg": "ok"}, HTTPStatus.OK
 
 
@@ -250,6 +254,9 @@ async def create_feedback_template(body: feedback_template_model):
 @jwt_required()
 @role_required(["Human Resources"])
 async def create_feedback(body: CreateFeedback):
+    current_user = get_jwt_identity()
+    current_user_id = current_user.get("id")
+
     does_template_exists = db.session.execute(
         select(feedback_template_schema).where(
             feedback_template_schema.id == body.feedback_form_template_id
@@ -261,25 +268,32 @@ async def create_feedback(body: CreateFeedback):
             "msg": "feedback template doesnt exist",
         }, HTTPStatus.BAD_REQUEST
 
-    filtered_employees = get_filtered_employees_func(
-        department_id=body.department_id, role_id=body.role_id
-    )
+    if body.to_employee_id == -1:
+        filtered_employees = get_filtered_employees_func(
+            department_id=body.department_id, role_id=body.role_id
+        )
+
+    else:
+        filtered_employees = [{"id": body.to_employee_id}]
 
     for employee in filtered_employees:
+        print('sending to id', employee.get('id'))
         new_feedback = feedback_schema(
-            from_employee_id=1,
-            to_employee_id=employee.id,
+            from_employee_id=current_user_id,
+            to_employee_id=employee.get('id'),
             date_sent=datetime.now(),
             template_id=body.feedback_form_template_id,
         )
         db.session.add(new_feedback)
 
+        print('sending this', new_feedback)
     try:
         db.session.commit()
     except Exception:
         db.session.rollback()
         logging.error("error occupied during creation of new feedback")
-
+        return {"msg": "error"}, HTTPStatus.BAD_REQUEST
+    
     return {"msg": "ok"}, HTTPStatus.OK
 
 
@@ -291,6 +305,9 @@ async def create_feedback(body: CreateFeedback):
 @jwt_required()
 @role_required([])
 async def create_feedback_answer(body: CreateFeedbackAnswer):
+    current_user = get_jwt_identity()
+    current_user_id = current_user.get("id")
+
     feedback = db.session.execute(
         select(feedback_schema).where(feedback_schema.id == body.feedback_id)
     ).scalar()
@@ -307,5 +324,6 @@ async def create_feedback_answer(body: CreateFeedbackAnswer):
     except Exception:
         db.session.rollback()
         logging.error("error occupied during creation of feedback answer")
+        return {"msg": "error"}, HTTPStatus.BAD_REQUEST
 
     return { "msg": "ok"}, HTTPStatus.OK

@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import List
+from typing import List, Optional
 from datetime import datetime
 from pydantic.json_schema import SkipJsonSchema
 from typing import List, Any
@@ -11,9 +11,9 @@ class Feedback(BaseModel):
     from_employee_id: int = Field(None)
     to_employee_id: int = Field(None)
     template_id: int = Field(None)
-    answer_content: str = ""
-    date_sent: SkipJsonSchema[datetime] = Field(None)
-    date_answered: SkipJsonSchema[datetime] = Field(None)
+    answer_content: Optional[str] = ""
+    date_sent: SkipJsonSchema[Optional[datetime]] = Field(None)
+    date_answered: SkipJsonSchema[Optional[datetime]] = Field(None)
 
     class Config:
         orm_mode = True
@@ -59,7 +59,7 @@ class GetFilteredFeedback(BaseModel):
 
 
 class CreateFeedback(BaseModel):
-    user_id: int
+    to_employee_id: int = -1
     department_id: int = -1
     role_id: int = -1
     feedback_form_template_id: int
@@ -67,5 +67,5 @@ class CreateFeedback(BaseModel):
 
 class CreateFeedbackAnswer(BaseModel):
     feedback_id: int
-    answer_content: int
+    answer_content: str
     date_answered: datetime = Field(default_factory=datetime.now)

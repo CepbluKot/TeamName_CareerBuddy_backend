@@ -89,7 +89,14 @@ def generate_feedback_answer(from_employee_id: int, to_employee_id, template_id:
         logging.error(f"error occupied during generating feedback: {e}")
 
 
+def generate_feedback_templates_jsons():
+    pass
+
+
 def generate_feedback():
+
+
+
     hr_employees = db.session.execute(
         select(Employees.id, Departments.name)
         .filter(Employees.role_id == Departments.id)

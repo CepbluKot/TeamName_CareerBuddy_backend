@@ -37,6 +37,9 @@ admin.add_view(ModelView(Departments, db.session))
 
 
 if __name__ == "__main__":
+    with app.app_context():
+        db.create_all()
+    
     data_generator_thr = threading.Thread(target=generate_test_data)
     data_generator_thr.daemon = True
     data_generator_thr.start()

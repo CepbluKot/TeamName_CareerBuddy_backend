@@ -18,7 +18,7 @@ class Employees(BaseModel):
     distance_from_home: int = Field(None)
     education: int = Field(None)
     education_field: str = Field(None)
-    employee_number: int = Field(None)
+    # employee_number: int = Field(None)
     relationship_satisfaction: int = Field(None)
     standard_hours: int = Field(None)
     stock_option_level: int = Field(None)

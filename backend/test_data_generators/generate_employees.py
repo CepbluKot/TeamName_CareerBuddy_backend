@@ -15,7 +15,7 @@ f = Faker()
 def generate_employees():
     df = pd.read_csv("dataset.csv")
 
-    login_id = 0
+    login_id = 1
 
     for index, row in df.iterrows():
         job_role = row["JobRole"]
@@ -39,16 +39,16 @@ def generate_employees():
         name = name_data[0]
         surname = name_data[1]
 
-        last_employee_num = db.session.execute(
-            select(employees_schema.employee_number).order_by(
-                employees_schema.employee_number.desc()
-            )
-        ).scalar()
-        if not last_employee_num:
-            last_employee_num = 0
+        # last_employee_num = db.session.execute(
+        #     select(employees_schema.employee_number).order_by(
+        #         employees_schema.employee_number.desc()
+        #     )
+        # ).scalar()
+        # if not last_employee_num:
+        #     last_employee_num = 0
 
         employee_db_record = employees_schema(
-            id=last_employee_num,
+            # id=last_employee_num,
             name=name,
             surname=surname,
             email=f.email(),
@@ -61,7 +61,7 @@ def generate_employees():
             distance_from_home=row["DistanceFromHome"],
             education=row["Education"],
             education_field=row["EducationField"],
-            employee_number=row["EmployeeNumber"],
+            # employee_number=row["EmployeeNumber"],
             relationship_satisfaction=row["EnvironmentSatisfaction"],
             standard_hours=row["StandardHours"],
             stock_option_level=row["StockOptionLevel"],

@@ -1,11 +1,11 @@
 from settings import db
-from sqlalchemy import ForeignKey
+from sqlalchemy import ForeignKey, Sequence
 from sqlalchemy.orm import mapped_column
 
 
 class Feedback(db.Model):
     __tablename__ = "feedback"
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, Sequence('feedback_id_seq'), primary_key=True)
     from_employee_id = mapped_column(ForeignKey("employees.id"))
     to_employee_id = mapped_column(ForeignKey("employees.id"))
     template_id = mapped_column(ForeignKey("feedback_templates.id"))
@@ -16,7 +16,7 @@ class Feedback(db.Model):
 
 class FeedbackTemplates(db.Model):
     __tablename__ = "feedback_templates"
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, Sequence('feedback_templates_id_seq'), primary_key=True)
     name = db.Column(db.String)
     content = db.Column(db.String)
     created_by_employee_id = mapped_column(ForeignKey("employees.id"))

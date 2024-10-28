@@ -19,3 +19,4 @@ def generate_departments():
     except Exception as e:
         db.session.rollback()
         logging.error(f"error occupied during generating departments: {e}")
+        

@@ -2,11 +2,12 @@ from settings import db
 from sqlalchemy import ForeignKey, func
 from sqlalchemy.orm import mapped_column, relationship, Mapped
 from sqlalchemy.dialects.postgresql import ARRAY
+from sqlalchemy import Sequence
 
 
 class Employees(db.Model):
     __tablename__ = "employees"
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    id = db.Column(db.Integer, Sequence('employees_id_seq'), primary_key=True)
     name = db.Column(db.String)
     surname = db.Column(db.String)
     email = db.Column(db.String)
@@ -19,7 +20,7 @@ class Employees(db.Model):
     distance_from_home = db.Column(db.Integer)
     education = db.Column(db.Integer)
     education_field = db.Column(db.String)
-    employee_number = db.Column(db.Integer)
+    # employee_number = db.Column(db.Integer)
     relationship_satisfaction = db.Column(db.Integer)
     standard_hours = db.Column(db.Integer)
     stock_option_level = db.Column(db.Integer)
@@ -34,7 +35,7 @@ class Employees(db.Model):
 
 class Roles(db.Model):
     __tablename__ = "roles"
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, Sequence('roles_id_seq'), primary_key=True)
     name = db.Column(db.String)
     admin_page = db.Column(db.Boolean)
     feedback_page = db.Column(db.Boolean)
@@ -43,5 +44,5 @@ class Roles(db.Model):
 
 class Departments(db.Model):
     __tablename__ = "departments"
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, Sequence('departments_id_seq'), primary_key=True)
     name = db.Column(db.String)
